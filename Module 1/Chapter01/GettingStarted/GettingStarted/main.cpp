@@ -1,5 +1,5 @@
-#include <GL/glew.h>
-#include <GL/freeglut.h>
+#include "GL/glew.h"
+#include "GL/freeglut.h"
 #include <iostream>
 
 #pragma comment(lib, "glew32.lib")
