@@ -17,8 +17,8 @@
 using namespace std;
 
 //screen resolution
-const int WIDTH  = 1280;
-const int HEIGHT = 960;
+const int WIDTH  = 800;
+const int HEIGHT = 600;
 
 //camera transform variables
 int state = 0, oldX=0, oldY=0;
@@ -64,13 +64,14 @@ bool LoadVolume() {
 		GLubyte* pData = new GLubyte[XDIM*YDIM*ZDIM];
 		infile.read(reinterpret_cast<char*>(pData), XDIM*YDIM*ZDIM*sizeof(GLubyte));
 		infile.close();
-
+		
 		//generate OpenGL texture
 		glGenTextures(1, &textureID);
 		glBindTexture(GL_TEXTURE_3D, textureID);
-
+		GL_CHECK_ERRORS
 		// set the texture parameters
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		GL_CHECK_ERRORS
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
