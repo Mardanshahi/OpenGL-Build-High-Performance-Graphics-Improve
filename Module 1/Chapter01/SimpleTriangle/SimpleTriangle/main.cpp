@@ -2,21 +2,21 @@
 #include <GL/freeglut.h>
 #include <iostream>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 #include "GLSLShader.h"
 
 #define GL_CHECK_ERRORS assert(glGetError()== GL_NO_ERROR);
 
-#pragma comment(lib, "glew32.lib")
+//#pragma comment(lib, "glew32.lib")
 
 using namespace std;
 
 //screen size
-const int WIDTH  = 1280;
-const int HEIGHT = 960;
+const int WIDTH  = 800;
+const int HEIGHT = 600;
 
 //shader reference
 GLSLShader shader;
