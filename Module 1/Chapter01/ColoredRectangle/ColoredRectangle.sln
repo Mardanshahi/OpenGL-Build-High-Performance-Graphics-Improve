@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32804.467
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ColoredRectangle", "ColoredRectangle\ColoredRectangle.vcxproj", "{07CFB0AF-791D-4339-BDC4-05298F427E69}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{07CFB0AF-791D-4339-BDC4-05298F427E69}.Debug|x86.ActiveCfg = Debug|Win32
+		{07CFB0AF-791D-4339-BDC4-05298F427E69}.Debug|x86.Build.0 = Debug|Win32
+		{07CFB0AF-791D-4339-BDC4-05298F427E69}.Release|x86.ActiveCfg = Release|Win32
+		{07CFB0AF-791D-4339-BDC4-05298F427E69}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8B4F076B-44A0-439B-A77D-F392EB488F43}
+	EndGlobalSection
+EndGlobal
