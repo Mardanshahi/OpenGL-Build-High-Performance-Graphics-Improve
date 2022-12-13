@@ -71,6 +71,7 @@ bool LoadVolume() {
 		GL_CHECK_ERRORS
 		// set the texture parameters
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		std::cout << glGetError() << std::endl;
 		GL_CHECK_ERRORS
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
