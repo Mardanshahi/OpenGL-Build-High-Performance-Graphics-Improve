@@ -83,6 +83,7 @@ bool LoadVolume() {
 
 		//allocate data with internal format and foramt as (GL_RED)			
 		glTexImage3D(GL_TEXTURE_3D,0,GL_RED,XDIM,YDIM,ZDIM,0,GL_RED,GL_UNSIGNED_BYTE,pData);
+		std::cout << glGetError() << std::endl;
 		GL_CHECK_ERRORS
 
 		//generate mipmaps
@@ -239,7 +240,7 @@ void OnResize(int w, int h) {
 	//reset the viewport
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	//setup the projection matrix
-	P = glm::perspective(60.0f,(float)w/h, 0.1f,1000.0f);
+	P = glm::perspective(20.0f,(float)w/h, 0.1f,1000.0f);
 }
 
 //display callback function
