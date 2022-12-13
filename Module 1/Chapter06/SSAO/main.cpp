@@ -202,8 +202,8 @@ void OnMouseMove(int x, int y)
 	if (state == 0)
 		dist *= (1 + (y - oldY)/60.0f);
 	else if(state ==2) {
-		theta += (oldX - x)/60.0f;
-		phi += (y - oldY)/60.0f;
+		theta += (oldX - x)/600.0f;
+		phi += (y - oldY)/600.0f;
 
 		//update the light position
 		lightPosOS.x = radius * cos(theta)*sin(phi);
@@ -211,8 +211,8 @@ void OnMouseMove(int x, int y)
 		lightPosOS.z = radius * sin(theta)*sin(phi);
 
 	} else {
-		rY += (x - oldX)/5.0f;
-		rX += (y - oldY)/5.0f;
+		rY += (x - oldX)/50.0f;
+		rX += (y - oldY)/50.0f;
 	}
 	oldX = x;
 	oldY = y;
@@ -612,7 +612,7 @@ void OnResize(int w, int h) {
 	//set the viewport
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	//setup the projection matrix
-	P = glm::perspective(60.0f,(float)w/h, 0.1f,1000.0f);
+	P = glm::perspective(20.0f,(float)w/h, 0.1f,1000.0f);
 }
 
 //display callback function
