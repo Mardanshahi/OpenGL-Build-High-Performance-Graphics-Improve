@@ -67,8 +67,8 @@ void OnMouseMove(int x, int y)
 		dist *= (1 + (y - oldY)/60.0f);
 	else
 	{
-		rY += (x - oldX)/5.0f;
-		rX += (y - oldY)/5.0f;
+		rY -= (x - oldX)/500.0f;
+		rX += (y - oldY)/500.0f;
 	}
 	oldX = x;
 	oldY = y;
