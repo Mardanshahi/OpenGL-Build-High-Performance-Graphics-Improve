@@ -133,7 +133,7 @@ void initFBO() {
 		glTexParameteri(GL_TEXTURE_RECTANGLE , GL_TEXTURE_WRAP_T, GL_CLAMP);
 		glTexImage2D(GL_TEXTURE_RECTANGLE , 0, GL_RGBA, WIDTH, HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
 	}
-
+	std::cout << glGetError() << std::endl;
 	GL_CHECK_ERRORS
 
 	//Now setup the colour attachment for colour blend FBO
@@ -230,6 +230,7 @@ void OnInit() {
 	//create a uniform grid of size 20x20 in XZ plane
 	grid = new CGrid(20,20);
 
+	std::cout << glGetError() << std::endl;
 	GL_CHECK_ERRORS
 
 	//generate the quad vertices
@@ -419,7 +420,7 @@ void OnResize(int w, int h) {
 	//set the viewport
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	//setup the projection matrix
-	P = glm::perspective(60.0f,(float)w/h, 0.1f,1000.0f);
+	P = glm::perspective(20.0f,(float)w/h, 0.1f,1000.0f);
 }
 
 
@@ -449,7 +450,8 @@ void DrawScene(const glm::mat4& MVP, GLSLShader& shader, bool useColor=false, bo
 		for(int j=-1;j<=1;j++) {
 			int index =0;
 			for(int i=-1;i<=1;i++) {
-				GL_CHECK_ERRORS
+				//std::cout << glGetError() << std::endl;
+				//GL_CHECK_ERRORS
 				//set the modelling transformation and shader uniforms
 				glm::mat4 T = glm::translate(glm::mat4(1), glm::vec3(i*2,j*2,k*2));
 				if(useColor)
@@ -461,7 +463,8 @@ void DrawScene(const glm::mat4& MVP, GLSLShader& shader, bool useColor=false, bo
 				
 				//draw the cube
 				glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
-				GL_CHECK_ERRORS
+				//std::cout << glGetError() << std::endl;
+				//GL_CHECK_ERRORS
 			}
 		}
 	}
@@ -513,6 +516,7 @@ void OnRender() {
 		glClearColor(0, 0, 0, 0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		std::cout << glGetError() << std::endl;
 		GL_CHECK_ERRORS
 
 		// Render target 0 stores (-minDepth, maxDepth)
@@ -581,6 +585,7 @@ void OnRender() {
 				glBeginQuery(GL_SAMPLES_PASSED_ARB, queryId);
 			}
 
+			std::cout << glGetError() << std::endl;
 			GL_CHECK_ERRORS
 
 			//bind the back colour attachment to texture unit 0
@@ -606,6 +611,7 @@ void OnRender() {
 			GL_CHECK_ERRORS
 		}
 
+		std::cout << glGetError() << std::endl;
 		GL_CHECK_ERRORS
 
 		//disable alpha blending

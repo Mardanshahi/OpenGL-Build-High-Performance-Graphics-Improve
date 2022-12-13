@@ -242,6 +242,7 @@ void OnInit() {
 			SOIL_free_image_data(pData);
 		}
 	}
+	std::cout << glGetError() << std::endl;
 	GL_CHECK_ERRORS
 
 	//load flat shader
@@ -401,6 +402,7 @@ void OnInit() {
 	//delete the data pointer
 	delete [] pData;
 
+	std::cout << glGetError() << std::endl;
 	GL_CHECK_ERRORS
 
 	//store the mesh topology in another texture bound to texture unit 2
@@ -426,6 +428,7 @@ void OnInit() {
 	//delete heap allocated buffer
 	delete [] pData2;
 
+	std::cout << glGetError() << std::endl;
 	GL_CHECK_ERRORS
 
 	//set texture unit 0 as active texture unit
@@ -499,7 +502,7 @@ void OnResize(int w, int h) {
 	//set the viewport
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	//setup the projection matrix
-	P = glm::perspective(60.0f,(float)w/h, 0.1f,1000.0f);
+	P = glm::perspective(20.0f,(float)w/h, 0.1f,1000.0f);
 }
 
 //display callback function
