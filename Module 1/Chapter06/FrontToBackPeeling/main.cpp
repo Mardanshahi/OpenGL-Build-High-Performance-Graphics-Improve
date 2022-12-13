@@ -194,6 +194,7 @@ void OnInit() {
 	//create a uniform grid of size 20x20 in XZ plane
 	grid = new CGrid(20,20);
 
+	std::cout << glGetError() << std::endl;
 	GL_CHECK_ERRORS
 
 	//generate the quad vertices
@@ -356,7 +357,7 @@ void OnResize(int w, int h) {
 	//set the viewport
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	//setup the projection matrix
-	P = glm::perspective(60.0f,(float)w/h, 0.1f,1000.0f);
+	P = glm::perspective(20.0f,(float)w/h, 0.1f,1000.0f);
 }
 
 //idle callback
