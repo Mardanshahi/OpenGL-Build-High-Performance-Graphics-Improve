@@ -32,9 +32,9 @@ struct Vertex {
 	glm::vec3 color;
 };
 
-//triangle vertices and indices
-Vertex vertices[3];
-GLushort indices[3];
+//Rectangle vertices and indices
+Vertex vertices[4];
+GLushort indices[6];
 
 //projection and modelview matrices
 glm::mat4  P = glm::mat4(1);
@@ -62,15 +62,20 @@ void OnInit() {
 	vertices[0].color=glm::vec3(1,0,0);
 	vertices[1].color=glm::vec3(0,1,0);
 	vertices[2].color=glm::vec3(0,0,1);
+	vertices[3].color = glm::vec3(1, 0, 1);
 
-	vertices[0].position=glm::vec3(-1,-1,0);
-	vertices[1].position=glm::vec3(0,1,0);
-	vertices[2].position=glm::vec3(1,-1,0);
+	vertices[0].position=glm::vec3(-0.8,-0.8,0);
+	vertices[1].position=glm::vec3(-0.8, 0.8,0);
+	vertices[2].position=glm::vec3(0.8, 0.8,0);
+	vertices[3].position = glm::vec3(0.8, -0.8, 0);
 
-	//setup triangle indices
+	//setup rectangle indices
 	indices[0] = 0;
 	indices[1] = 1;
-	indices[2] = 2;
+	indices[2] = 3;
+	indices[3] = 1;
+	indices[4] = 2;
+	indices[5] = 3;
 
 	GL_CHECK_ERRORS
 
@@ -131,10 +136,10 @@ void OnRender() {
 
 	//bind the shader
 	shader.Use();
-		//pass the shader uniform
-		glUniformMatrix4fv(shader("MVP"), 1, GL_FALSE, glm::value_ptr(P*MV));
-			//drwa triangle
-			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+	//pass the shader uniform
+	glUniformMatrix4fv(shader("MVP"), 1, GL_FALSE, glm::value_ptr(P*MV));
+	//drwa triangle
+	glDrawElements(GL_TRIANGLES, size(indices), GL_UNSIGNED_SHORT, 0);
 	//unbind the shader
 	shader.UnUse();
 	 
@@ -149,7 +154,7 @@ int main(int argc, char** argv) {
 	glutInitContextVersion (3, 3);
 	glutInitContextFlags (GLUT_CORE_PROFILE | GLUT_DEBUG);
 	glutInitWindowSize(WIDTH, HEIGHT);
-	glutCreateWindow("Simple triangle - OpenGL 3.3");
+	glutCreateWindow("Colored Rectangle - OpenGL 3.3");
 
 	//glew initialization
 	glewExperimental = GL_TRUE;
