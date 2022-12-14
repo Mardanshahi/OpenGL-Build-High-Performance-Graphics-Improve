@@ -86,10 +86,6 @@
     <ClCompile Include="..\src\Grid.cpp" />
     <ClCompile Include="..\src\RenderableObject.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="TetrahedraMarcher.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="TetrahedraMarcher.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
