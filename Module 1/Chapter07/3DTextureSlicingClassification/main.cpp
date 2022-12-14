@@ -95,90 +95,12 @@ int edgeList[8][12] = {
 const int edges[12][2]= {{0,1},{1,2},{2,3},{3,0},{0,4},{1,5},{2,6},{3,7},{4,5},{5,6},{6,7},{7,4}};
 
 //transfer function (lookup table) colour values
-const glm::vec4 jet_values[81] = {
-								glm::vec4(1.0, 0.0, 0.0, 0.0),
-								glm::vec4(0.9, 0.1, 0.0, 0.0),
-								glm::vec4(0.0, 0.2, 0.0, 0.0),
-								glm::vec4(0.7, 0.3, 0.0, 0.0),
-								glm::vec4(0.6, 0.4, 0.0, 0.0),
-								glm::vec4(0.5, 0.5, 0.0, 0.0),
-								glm::vec4(0.4, 0.6, 0.0, 0.0),
-								glm::vec4(0.4, 0.7, 0.0, 0.0),
-								glm::vec4(0.3, 0.9, 0.0, 0.0),
-								glm::vec4(0.3, 1.0, 0.0, 0.0),
-								glm::vec4(0.2, 1.0, 0.0, 0.0),
-								glm::vec4(0.2, 1.0, 0.0, 0.0),
-								glm::vec4(0.1, 1.0, 0.0, 0.0),
-								glm::vec4(0.1, 1.0, 0.0, 0.0),
-								glm::vec4(1.0, 0.0, 0.0, 0.0),
-								glm::vec4(0.0, 1.0, 0.1, 0.0),
-								glm::vec4(0.0, 0.0, 1.0, 0.0),
-								glm::vec4(0.0, 0.9, 0.2, 0.0),
-								glm::vec4(0.0, 0.7, 0.2, 0.0),
-								glm::vec4(0.0, 0.5, 0.3, 0.0),
-								glm::vec4(0.0, 0.4, 0.3, 0.0),
-								glm::vec4(0.0, 0.3, 0.4, 0.0),
-								glm::vec4(0.0, 0.2, 0.5, 0.0),
-								glm::vec4(0.0, 0.2, 0.6, 0.0),
-								glm::vec4(0.0, 0.1, 0.7, 0.0),
-								glm::vec4(0.0, 0.1, 0.8, 0.0),
-								glm::vec4(0.0, 0.0, 1.0, 0.0),
-
-								glm::vec4(1.0, 0.0, 0.0, 0.0),
-								glm::vec4(0.9, 0.1, 0.0, 0.0),
-								glm::vec4(0.0, 0.2, 0.0, 0.0),
-								glm::vec4(0.7, 0.3, 0.0, 0.0),
-								glm::vec4(0.6, 0.4, 0.0, 0.0),
-								glm::vec4(0.5, 0.5, 0.0, 0.0),
-								glm::vec4(0.4, 0.6, 0.0, 0.0),
-								glm::vec4(0.4, 0.7, 0.0, 0.0),
-								glm::vec4(0.3, 0.9, 0.0, 0.0),
-								glm::vec4(0.3, 1.0, 0.0, 0.0),
-								glm::vec4(0.2, 1.0, 0.0, 0.0),
-								glm::vec4(0.2, 1.0, 0.0, 0.0),
-								glm::vec4(0.0, 0.0, 1.0, 0.0),
-								glm::vec4(1.0, 0.0, 0.0, 0.0),//out
-								glm::vec4(0.0, 1.0, 0.0, 0.0),//circle
-								glm::vec4(0.0, 0.0, 1.0, 0.0),//circle
-								glm::vec4(1.0, 0.0, 0.0, 0.0),//circle
-								glm::vec4(0.1, 1.0, 1.0, 0.9),//
-								glm::vec4(1.0, 0.0, 0.0, 1.0),//
-								glm::vec4(1.0, 0.0, 1.0, 0.0),
-								glm::vec4(0.0, 0.4, 0.3, 0.0),
-								glm::vec4(0.0, 0.3, 0.4, 0.0),
-								glm::vec4(0.0, 0.2, 0.5, 0.0),
-								glm::vec4(0.0, 0.2, 0.6, 0.0),
-								glm::vec4(0.0, 0.1, 0.7, 0.0),
-								glm::vec4(0.0, 0.1, 0.8, 0.0),
-								glm::vec4(0.0, 0.0, 1.0, 0.0),
-
-								glm::vec4(1.0, 0.0, 0.0, 0.0),
-								glm::vec4(0.9, 0.1, 0.0, 0.0),
-								glm::vec4(0.0, 0.2, 0.0, 0.0),
-								glm::vec4(0.7, 0.3, 0.0, 0.0),
-								glm::vec4(0.6, 0.4, 0.0, 0.0),
-								glm::vec4(0.5, 0.5, 0.0, 0.0),
-								glm::vec4(0.4, 0.6, 0.0, 0.0),
-								glm::vec4(0.4, 0.7, 0.0, 0.0),
-								glm::vec4(0.3, 0.9, 0.0, 0.0),
-								glm::vec4(0.3, 1.0, 0.0, 0.0),
-								glm::vec4(0.2, 1.0, 0.0, 0.0),
-								glm::vec4(0.2, 1.0, 0.0, 0.0),
-								glm::vec4(0.1, 1.0, 0.0, 0.0),
-								glm::vec4(0.1, 1.0, 0.0, 0.0),
-								glm::vec4(1.0, 0.0, 0.0, 0.0),
-								glm::vec4(0.0, 1.0, 0.1, 0.0),
-								glm::vec4(0.0, 0.0, 1.0, 0.0),
-								glm::vec4(0.0, 0.9, 0.2, 0.0),
-								glm::vec4(0.0, 0.7, 0.2, 0.0),
-								glm::vec4(0.0, 0.5, 0.3, 0.0),
-								glm::vec4(0.0, 0.4, 0.3, 0.0),
-								glm::vec4(0.0, 0.3, 0.4, 0.0),
-								glm::vec4(0.0, 0.2, 0.5, 0.0),
-								glm::vec4(0.0, 0.2, 0.6, 0.0),
-								glm::vec4(0.0, 0.1, 0.7, 0.0),
-								glm::vec4(0.0, 0.1, 0.8, 0.0),
-								glm::vec4(0.0, 0.0, 1.0, 0.0) };
+const glm::vec4 jet_values[4] = {
+								glm::vec4(0.5, 0.3, 0.0, 0.0),
+								glm::vec4(0.5, 0.1, 0.0, 1.0),
+								glm::vec4(0.0, 0.2, 0.5, 1.0),
+								glm::vec4(0.0, 0.3, 0.5, 0.0),
+								 };
 
 //current viewing direction
 glm::vec3 viewDir;
@@ -276,20 +198,25 @@ bool LoadVolumeUShort() {
 //interpolated result.
 void LoadTransferFunction() {
 	float pData[256][4];
-	int indices[81];
+	int indices[4];
 
 	//fill the colour values at the place where the colour should be after interpolation
-	for(int i=0;i<81;i++) {
-		int index = i*3;
-		pData[index][0] = jet_values[i].x;
-		pData[index][1] = jet_values[i].y;
-		pData[index][2] = jet_values[i].z;
-		pData[index][3] = jet_values[i].w;
-		indices[i] = index;
-	}
+	// index must be below 256
+	int index0[] = {130, 131, 140, 141};
+		
+		for (int i = 0; i < 4; i++)
+		{
+			pData[index0[i]][0] = jet_values[i].x;
+			pData[index0[i]][1] = jet_values[i].y;
+			pData[index0[i]][2] = jet_values[i].z;
+			pData[index0[i]][3] = jet_values[i].w;
+			indices[i] = index0[i];
+
+		}
+
 
 	//for each adjacent pair of colours, find the difference in the rgba values and then interpolate
-	for(int j=0;j<81-1;j++)
+	for(int j=0;j<4-1;j++)
 	{
 		float dDataR = (pData[indices[j+1]][0] - pData[indices[j]][0]);
 		float dDataG = (pData[indices[j+1]][1] - pData[indices[j]][1]);
