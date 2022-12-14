@@ -50,12 +50,13 @@ glm::vec3 vTextureSlices[MAX_SLICES*12];
 glm::vec4 bg=glm::vec4(0.5,0.5,1,1);
 
 //volume data files
-const std::string volume_file = "../media/Engine256.raw";
+const std::string volume_file = "../media/manix.raw";
+bool is16bit = true;
 
 //dimensions of volume data
-const int XDIM = 256;
-const int YDIM = 256;
-const int ZDIM = 256;
+const int XDIM = 512;
+const int YDIM = 512;
+const int ZDIM = 460;
 
 //total number of slices current used
 int num_slices =  256;
@@ -135,7 +136,7 @@ bool LoadVolume() {
 
 		//allocate data with internal format and foramt as (GL_RED)		
 		glTexImage3D(GL_TEXTURE_3D,0,GL_RED,XDIM,YDIM,ZDIM,0,GL_RED,GL_UNSIGNED_BYTE,pData);
-		
+
 		std::cout << glGetError() << std::endl;
 		GL_CHECK_ERRORS
 
@@ -151,6 +152,49 @@ bool LoadVolume() {
 	}
 }
 
+bool LoadVolumeUShort() {
+	std::ifstream infile(volume_file.c_str(), std::ios_base::binary);
+
+	if (infile.good()) {
+		//read the volume data file
+		GLushort* pData = new GLushort[XDIM * YDIM * ZDIM];
+		infile.read(reinterpret_cast<char*>(pData), XDIM * YDIM * ZDIM * sizeof(GLushort));
+		infile.close();
+
+		//generate OpenGL texture
+		glGenTextures(1, &textureID);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_3D, textureID);
+
+		// set the texture parameters
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+		//set the mipmap levels (base and max)
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 4);
+
+		//allocate data with internal format and foramt as (GL_RED)		
+		glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, XDIM, YDIM, ZDIM, 0, GL_RED, GL_UNSIGNED_SHORT, pData);
+
+		std::cout << glGetError() << std::endl;
+		GL_CHECK_ERRORS
+
+			//generate mipmaps
+			glGenerateMipmap(GL_TEXTURE_3D);
+
+		//delete the volume data allocated on heap
+		delete[] pData;
+
+		return true;
+	}
+	else {
+		return false;
+	}
+}
 //function to generate interpolated colours from the set of colour values (jet_values)
 //this function first calculates the amount of increments for each component and the
 //index difference. Then it linearly interpolates the adjacent values to get the 
@@ -450,9 +494,9 @@ void OnInit() {
 	GL_CHECK_ERRORS
 
 	//load volume data and generate the volume texture
-	if(LoadVolume()) {
+	if (is16bit? LoadVolumeUShort(): LoadVolume())
 		std::cout<<"Volume data loaded successfully."<<std::endl;
-	} else {
+	else {
 		std::cout<<"Cannot load volume data."<<std::endl;
 		exit(EXIT_FAILURE);
 	}
