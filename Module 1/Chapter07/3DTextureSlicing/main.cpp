@@ -14,7 +14,7 @@
 //for floating point inaccuracy
 const float EPSILON = 0.0001f;
 
-#pragma comment(lib, "glew32.lib")
+//#pragma comment(lib, "glew32.lib")
 
 using namespace std;
 
@@ -50,12 +50,13 @@ glm::vec3 vTextureSlices[MAX_SLICES*12];
 glm::vec4 bg=glm::vec4(0.5,0.5,1,1);
 
 //volume data files
-const std::string volume_file = "../media/Engine256.raw";
+const std::string volume_file = "../media/bytesOFTest2.raw";
+bool is16bit = true;
 
 //dimensions of volume data
-const int XDIM = 256;
-const int YDIM = 256;
-const int ZDIM = 256;
+const int XDIM = 512;
+const int YDIM = 512;
+const int ZDIM = 464;
 
 //total number of slices current used
 int num_slices = 256;
@@ -136,6 +137,47 @@ bool LoadVolume() {
 	}
 }
 
+bool LoadVolumeUShort() {
+	std::ifstream infile(volume_file.c_str(), std::ios_base::binary);
+
+	if (infile.good()) {
+		//read the volume data file
+		GLushort* pData = new GLushort[XDIM * YDIM * ZDIM];
+		infile.read(reinterpret_cast<char*>(pData), XDIM * YDIM * ZDIM * sizeof(GLushort));
+		infile.close();
+
+		//generate OpenGL texture
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_3D, textureID);
+
+		// set the texture parameters
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+		//set the mipmap levels (base and max)
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 4);
+
+		//allocate data with internal format and foramt as (GL_RED)		
+		glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, XDIM, YDIM, ZDIM, 0, GL_RED, GL_UNSIGNED_SHORT, pData);
+		std::cout << glGetError() << std::endl;
+		GL_CHECK_ERRORS
+
+			//generate mipmaps
+			glGenerateMipmap(GL_TEXTURE_3D);
+
+		//delete the volume data allocated on heap
+		delete[] pData;
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 //mouse down event handler
 void OnMouseDown(int button, int s, int x, int y)
 {
@@ -160,8 +202,8 @@ void OnMouseMove(int x, int y)
 	if (state == 0) {
 		dist += (y - oldY)/50.0f;
 	} else {
-		rX += (y - oldY)/5.0f;
-		rY += (x - oldX)/5.0f;
+		rX += (y - oldY)/50.0f;
+		rY += (x - oldX)/50.0f;
 		bViewRotated = true;
 	}
 	oldX = x;
@@ -376,7 +418,7 @@ void OnInit() {
 	GL_CHECK_ERRORS
 
 	//load volume data
-	if(LoadVolume()) {
+	if(is16bit ? LoadVolumeUShort() : LoadVolume()) {
 		std::cout<<"Volume data loaded successfully."<<std::endl;		
 	} else {
 		std::cout<<"Cannot load volume data."<<std::endl;
@@ -435,7 +477,7 @@ void OnResize(int w, int h) {
 	//setup the viewport
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	//setup the projection matrix
-	P = glm::perspective(20.0f,(float)w/h, 0.1f,1000.0f);
+	P = glm::perspective(7.0f,(float)w/h, 0.1f,1000.0f);
 }
 
 //display function

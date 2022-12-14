@@ -20,7 +20,7 @@ using namespace std;
 
 //screen dimensions
 const int WIDTH  = 1280;
-const int HEIGHT = 960;
+const int HEIGHT = 720;
 
 //camera transform variables
 int state = 0, oldX=0, oldY=0;
@@ -47,12 +47,13 @@ const int MAX_SLICES = 512;
 glm::vec3 vTextureSlices[MAX_SLICES*12];
  
 //volume data files
-const std::string volume_file = "../media/Engine256.raw";
+const std::string volume_file = "../media/bytesOFTest2.raw";
+bool is16bit = true;
 
 //dimensions of volume data
-const int XDIM = 256;
-const int YDIM = 256;
-const int ZDIM = 256;
+const int XDIM = 512;
+const int YDIM = 512;
+const int ZDIM = 464;
 
 //total number of slices current used
 int num_slices =  256;
@@ -242,6 +243,50 @@ bool LoadVolume() {
 	}
 }
 
+bool LoadVolumeUShort() {
+	std::ifstream infile(volume_file.c_str(), std::ios_base::binary);
+
+	if (infile.good()) {
+		//read the volume data file
+		GLushort* pData = new GLushort[XDIM * YDIM * ZDIM];
+		infile.read(reinterpret_cast<char*>(pData), XDIM * YDIM * ZDIM * sizeof(GLushort));
+		infile.close();
+
+		//generate OpenGL texture
+		glGenTextures(1, &textureID);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_3D, textureID);
+
+		// set the texture parameters
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+		//set the mipmap levels (base and max)
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 4);
+
+		//allocate data with internal format and foramt as (GL_RED)		
+		glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, XDIM, YDIM, ZDIM, 0, GL_RED, GL_UNSIGNED_SHORT, pData);
+		std::cout << glGetError() << std::endl;
+		GL_CHECK_ERRORS
+
+		//generate mipmaps
+		glGenerateMipmap(GL_TEXTURE_3D);
+
+		//delete the volume data allocated on heap
+		delete[] pData;
+
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+
 //mouse down event handler
 void OnMouseDown(int button, int s, int x, int y)
 {
@@ -280,8 +325,8 @@ void OnMouseMove(int x, int y)
 		MV_L = glm::lookAt(lightPosOS,glm::vec3(0,0,0), glm::vec3(0,1,0));
 		S = BP*MV_L;
 	} else {
-		rX += (y - oldY)/5.0f;
-		rY += (x - oldX)/5.0f;
+		rX += (y - oldY)/50.0f;
+		rY += (x - oldX)/50.0f;
 		bViewRotated = true;
 	}
 	oldX = x;
@@ -577,10 +622,9 @@ void OnInit() {
 	GL_CHECK_ERRORS
 
 	//load volume data
-	if(LoadVolume()) {
-		std::cout<<"Volume data loaded successfully."<<std::endl;
-		 
-	} else {
+	if(is16bit ? LoadVolumeUShort() : LoadVolume()) 
+		std::cout<<"Volume data loaded successfully."<<std::endl;	 
+	else {
 		std::cout<<"Cannot load volume data."<<std::endl;
 		exit(EXIT_FAILURE);
 	}
@@ -713,7 +757,7 @@ void OnResize(int w, int h) {
 	//set the viewport
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	//setup the projection matrix
-	P = glm::perspective(20.0f,(float)w/h, 0.1f,1000.0f);
+	P = glm::perspective(7.0f,(float)w/h, 0.1f,1000.0f);
 }
 //function to render slice from the point of view of eye in the eye buffer
 void DrawSliceFromEyePointOfView(const int i) {
