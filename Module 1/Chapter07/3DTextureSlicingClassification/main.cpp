@@ -50,13 +50,13 @@ glm::vec3 vTextureSlices[MAX_SLICES*12];
 glm::vec4 bg=glm::vec4(0.5,0.5,1,1);
 
 //volume data files
-const std::string volume_file = "../media/manix.raw";
+const std::string volume_file = "../media/vista-ct.raw";
 bool is16bit = true;
 
 //dimensions of volume data
 const int XDIM = 512;
 const int YDIM = 512;
-const int ZDIM = 460;
+const int ZDIM = 54;
 
 //total number of slices current used
 int num_slices =  256;
@@ -97,31 +97,31 @@ const int edges[12][2]= {{0,1},{1,2},{2,3},{3,0},{0,4},{1,5},{2,6},{3,7},{4,5},{
 //transfer function (lookup table) colour values
 const glm::vec4 jet_values[27]={	
 								glm::vec4(1.0, 0.0, 0.0, 0.0),
-								glm::vec4(1.0, 0.0, 0.0, 0.1),
-								glm::vec4(1.0, 0.0, 0.0, 0.3),
-								glm::vec4(1.0, 0.0, 0.0, 0.5),
-								glm::vec4(1.0, 0.0, 0.0, 0.7),
-								glm::vec4(1.0, 0.0, 0.0, 0.7),
-								glm::vec4(1.0, 0.0, 0.0, 0.8),
-								glm::vec4(1.0, 0.0, 0.0, 0.8),
-								glm::vec4(1.0, 0.0, 0.0, 0.9),
-								glm::vec4(0.0, 1.0, 0.0, 0.9),
-								glm::vec4(0.0, 1.0, 0.0, 0.9),
-								glm::vec4(0.0, 1.0, 0.0, 0.9),
-								glm::vec4(0.0, 1.0, 0.0, 0.9),
-								glm::vec4(0.0, 1.0, 0.0, 0.9),
-								glm::vec4(0.0, 1.0, 0.0, 0.9),
-								glm::vec4(0.0, 1.0, 0.0, 0.9),
-								glm::vec4(0.0, 1.0, 0.0, 0.9),
-								glm::vec4(0.0, 1.0, 0.0, 0.9),
-								glm::vec4(0.0, 0.0, 1.0, 0.9),
-								glm::vec4(0.0, 0.0, 1.0, 0.9),
+								glm::vec4(0.9, 0.1, 0.0, 0.0),
+								glm::vec4(0.0, 0.2, 0.0, 0.0),
+								glm::vec4(0.7, 0.3, 0.0, 0.0),
+								glm::vec4(0.6, 0.4, 0.0, 0.0),
+								glm::vec4(0.5, 0.5, 0.0, 0.0),
+								glm::vec4(0.4, 0.6, 0.0, 0.0),
+								glm::vec4(0.4, 0.7, 0.0, 0.0),
+								glm::vec4(0.3, 0.9, 0.0, 0.0),//null
+								glm::vec4(0.3, 1.0, 0.0, 0.0),//null
+								glm::vec4(0.2, 1.0, 0.0, 0.0),//null
+								glm::vec4(0.2, 1.0, 0.0, 0.0),//out
+								glm::vec4(0.1, 1.0, 0.0, 0.0),//out
+								glm::vec4(0.1, 1.0, 0.0, 0.0),//out
+								glm::vec4(1.0, 0.0, 0.0, 0.0),//black circle
+								glm::vec4(0.0, 1.0, 0.1, 0.9),
 								glm::vec4(0.0, 0.0, 1.0, 0.8),
-								glm::vec4(0.0, 0.0, 1.0, 0.7),
-								glm::vec4(0.0, 0.0, 1.0, 0.5),
-								glm::vec4(0.0, 0.0, 1.0, 0.3),
-								glm::vec4(0.0, 0.0, 1.0, 0.2),
-								glm::vec4(0.0, 0.0, 1.0, 0.1),
+								glm::vec4(0.0, 0.9, 0.2, 0.0),
+								glm::vec4(0.0, 0.7, 0.2, 0.0),
+								glm::vec4(0.0, 0.5, 0.3, 0.0),
+								glm::vec4(0.0, 0.4, 0.3, 0.0),
+								glm::vec4(0.0, 0.3, 0.4, 0.0),
+								glm::vec4(0.0, 0.2, 0.5, 0.0),
+								glm::vec4(0.0, 0.2, 0.6, 0.0),
+								glm::vec4(0.0, 0.1, 0.7, 0.0),
+								glm::vec4(0.0, 0.1, 0.8, 0.0),
 								glm::vec4(0.0, 0.0, 1.0, 0.0)};
 
 //current viewing direction
