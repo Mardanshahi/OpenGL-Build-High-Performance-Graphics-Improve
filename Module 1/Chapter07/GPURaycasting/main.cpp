@@ -24,9 +24,6 @@ const int HEIGHT = 720;
 int state = 0, oldX=0, oldY=0;
 float rX=4, rY=50, dist = -2;
 
-//grid object
-#include "..\src\Grid.h"
-CGrid* grid;
 
 //modelview projection matrices
 glm::mat4 MV,P;
@@ -44,16 +41,55 @@ glm::vec4 bg=glm::vec4(0.5,0.5,1,1);
 
 
 //volume dataset filename  
-const std::string volume_file = "../media/bytesOFTest2.raw";
+const std::string volume_file = "../media/skull-monire.raw";
 bool is16bit = true;
 
-//volume dimensions
+//dimensions of volume data
 const int XDIM = 512;
 const int YDIM = 512;
-const int ZDIM = 464;
+const int ZDIM = 438;
 
 //volume texture ID
 GLuint textureID;
+
+//transfer function (lookup table) texture id
+GLuint tfTexID;
+
+//unit cube vertices 
+glm::vec3 vertices[8] = { glm::vec3(-0.5f,-0.5f,-0.5f),
+						glm::vec3(0.5f,-0.5f,-0.5f),
+						glm::vec3(0.5f, 0.5f,-0.5f),
+						glm::vec3(-0.5f, 0.5f,-0.5f),
+						glm::vec3(-0.5f,-0.5f, 0.5f),
+						glm::vec3(0.5f,-0.5f, 0.5f),
+						glm::vec3(0.5f, 0.5f, 0.5f),
+						glm::vec3(-0.5f, 0.5f, 0.5f) };
+
+//unit cube indices
+GLushort cubeIndices[36] = { 0,5,4,
+						  5,0,1,
+						  3,7,6,
+						  3,6,2,
+						  7,4,6,
+						  6,4,5,
+						  2,1,3,
+						  3,1,0,
+						  3,0,7,
+						  7,0,4,
+						  6,5,2,
+						  2,5,1 };
+
+//fill the colour values at the place where the colour should be after interpolation
+// index must be below 256
+int index0[] = { 133, 134, 135, 140 };
+//transfer function (lookup table) colour values
+const glm::vec4 jet_values[4] = {
+						glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
+						glm::vec4(1.0f, 0.9f, 0.6f, 0.7f),
+						glm::vec4(1.0f, 0.9f, 1.0f, 0.9f),
+						glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+};
+
 
 //function that load a volume from the given raw data file and 
 //generates an OpenGL 3D texture from it
@@ -144,6 +180,60 @@ bool LoadVolumeUShort() {
 	}
 }
 
+void LoadTransferFunction() {
+	float pData[256][4];
+	int indices[4];
+
+
+	for (int i = 0; i < 4; i++)
+	{
+		pData[index0[i]][0] = jet_values[i].x;
+		pData[index0[i]][1] = jet_values[i].y;
+		pData[index0[i]][2] = jet_values[i].z;
+		pData[index0[i]][3] = jet_values[i].w;
+		indices[i] = index0[i];
+
+	}
+
+
+	//for each adjacent pair of colours, find the difference in the rgba values and then interpolate
+	for (int j = 0; j < 4 - 1; j++)
+	{
+		float dDataR = (pData[indices[j + 1]][0] - pData[indices[j]][0]);
+		float dDataG = (pData[indices[j + 1]][1] - pData[indices[j]][1]);
+		float dDataB = (pData[indices[j + 1]][2] - pData[indices[j]][2]);
+		float dDataA = (pData[indices[j + 1]][3] - pData[indices[j]][3]);
+		int dIndex = indices[j + 1] - indices[j];
+
+		float dDataIncR = dDataR / float(dIndex);
+		float dDataIncG = dDataG / float(dIndex);
+		float dDataIncB = dDataB / float(dIndex);
+		float dDataIncA = dDataA / float(dIndex);
+		for (int i = indices[j] + 1; i < indices[j + 1]; i++)
+		{
+			pData[i][0] = (pData[i - 1][0] + dDataIncR);
+			pData[i][1] = (pData[i - 1][1] + dDataIncG);
+			pData[i][2] = (pData[i - 1][2] + dDataIncB);
+			pData[i][3] = (pData[i - 1][3] + dDataIncA);
+		}
+	}
+
+	//generate the OpenGL texture
+	glGenTextures(1, &tfTexID);
+	//bind this texture to texture unit 1
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_1D, tfTexID);
+
+	// set the texture parameters
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	//allocate the data to texture memory. Since pData is on stack, we donot delete it 
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, 256, 0, GL_RGBA, GL_FLOAT, pData);
+
+	GL_CHECK_ERRORS
+}
 
 //mouse down event handler
 void OnMouseDown(int button, int s, int x, int y)
@@ -178,12 +268,6 @@ void OnMouseMove(int x, int y)
 //OpenGL initialization
 void OnInit() {
 
-	GL_CHECK_ERRORS
-
-	//create a uniform grid of size 20x20 in XZ plane
-	grid = new CGrid(20,20);
-
-	GL_CHECK_ERRORS
 
 	//Load the raycasting shader
 	shader.LoadFromFile(GL_VERTEX_SHADER, "shaders/raycaster.vert");
@@ -192,16 +276,19 @@ void OnInit() {
 	//compile and link the shader
 	shader.CreateAndLinkProgram();
 	shader.Use();
-		//add attributes and uniforms
-		shader.AddAttribute("vVertex");
-		shader.AddUniform("MVP");
-		shader.AddUniform("volume");
-		shader.AddUniform("camPos");
-		shader.AddUniform("step_size");
+	//add attributes and uniforms
+	shader.AddAttribute("vVertex");
+	shader.AddUniform("MVP");
+	shader.AddUniform("volume");
+	shader.AddUniform("camPos");
+	shader.AddUniform("step_size");
+	shader.AddUniform("lut");
 
-		//pass constant uniforms at initialization
-		glUniform3f(shader("step_size"), 1.0f/XDIM, 1.0f/YDIM, 1.0f/ZDIM);
-		glUniform1i(shader("volume"),0);
+	//pass constant uniforms at initialization
+	glUniform3f(shader("step_size"), 1.0f/XDIM, 1.0f/YDIM, 1.0f/ZDIM);
+	glUniform1i(shader("volume"),0);
+	glUniform1i(shader("lut"), 1);
+
 	shader.UnUse();
 
 	GL_CHECK_ERRORS
@@ -214,6 +301,8 @@ void OnInit() {
 		exit(EXIT_FAILURE);
 	}
 
+	LoadTransferFunction();
+
 	//set background colour
 	glClearColor(bg.r, bg.g, bg.b, bg.a);
 	
@@ -222,42 +311,19 @@ void OnInit() {
 	glGenBuffers(1, &cubeVBOID);
 	glGenBuffers(1, &cubeIndicesID);
 
-	//unit cube vertices 
-	glm::vec3 vertices[8]={	glm::vec3(-0.5f,-0.5f,-0.5f),
-							glm::vec3( 0.5f,-0.5f,-0.5f),
-							glm::vec3( 0.5f, 0.5f,-0.5f),
-							glm::vec3(-0.5f, 0.5f,-0.5f),
-							glm::vec3(-0.5f,-0.5f, 0.5f),
-							glm::vec3( 0.5f,-0.5f, 0.5f),
-							glm::vec3( 0.5f, 0.5f, 0.5f),
-							glm::vec3(-0.5f, 0.5f, 0.5f)};
-
-	//unit cube indices
-	GLushort cubeIndices[36]={0,5,4,
-							  5,0,1,
-							  3,7,6,
-							  3,6,2,
-							  7,4,6,
-							  6,4,5,
-							  2,1,3,
-							  3,1,0,
-							  3,0,7,
-							  7,0,4,
-							  6,5,2,
-							  2,5,1};
 	glBindVertexArray(cubeVAOID);
-		glBindBuffer (GL_ARRAY_BUFFER, cubeVBOID);
-		//pass cube vertices to buffer object memory
-		glBufferData (GL_ARRAY_BUFFER, sizeof(vertices), &(vertices[0].x), GL_STATIC_DRAW);
+	glBindBuffer (GL_ARRAY_BUFFER, cubeVBOID);
+	//pass cube vertices to buffer object memory
+	glBufferData (GL_ARRAY_BUFFER, sizeof(vertices), &(vertices[0].x), GL_STATIC_DRAW);
 
-		GL_CHECK_ERRORS
-		//enable vertex attributre array for position
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,0,0);
+	GL_CHECK_ERRORS
+	//enable vertex attributre array for position
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,0,0);
 
-		//pass indices to element array  buffer
-		glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, cubeIndicesID);
-		glBufferData (GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), &cubeIndices[0], GL_STATIC_DRAW);
+	//pass indices to element array  buffer
+	glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, cubeIndicesID);
+	glBufferData (GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), &cubeIndices[0], GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
 
@@ -276,9 +342,9 @@ void OnShutdown() {
 	glDeleteVertexArrays(1, &cubeVAOID);
 	glDeleteBuffers(1, &cubeVBOID);
 	glDeleteBuffers(1, &cubeIndicesID);
+	glDeleteTextures(1, &tfTexID);
 
 	glDeleteTextures(1, &textureID);
-	delete grid;
 	cout<<"Shutdown successfull"<<endl;
 }
 
@@ -288,7 +354,7 @@ void OnResize(int w, int h) {
 	//reset the viewport
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	//setup the projection matrix
-	P = glm::perspective(7.0f,(float)w/h, 0.1f,1000.0f);
+	P = glm::perspective(glm::quarter_pi<float >(), (float)w / h, 0.01f, 10000.0f);
 }
 
 //display callback function
@@ -310,20 +376,19 @@ void OnRender() {
     glm::mat4 MVP	= P*MV;
 
 	//render grid
-	grid->Render(glm::value_ptr(MVP));
 
 	//enable blending and bind the cube vertex array object
 	glEnable(GL_BLEND);
 	glBindVertexArray(cubeVAOID);
-		//bind the raycasting shader
-		shader.Use();
-			//pass shader uniforms
-			glUniformMatrix4fv(shader("MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
-			glUniform3fv(shader("camPos"), 1, &(camPos.x));
-				//render the cube
-				glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
-		//unbind the raycasting shader
-		shader.UnUse();
+	//bind the raycasting shader
+	shader.Use();
+	//pass shader uniforms
+	glUniformMatrix4fv(shader("MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
+	glUniform3fv(shader("camPos"), 1, &(camPos.x));
+	//render the cube
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+	//unbind the raycasting shader
+	shader.UnUse();
 	//disable blending
 	glDisable(GL_BLEND);
 

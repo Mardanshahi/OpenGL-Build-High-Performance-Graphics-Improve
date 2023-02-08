@@ -2,16 +2,17 @@
 
 layout(location = 0) out vec4 vFragColor;	//fragment shader output
 
-smooth in vec3 vUV;				//3D texture coordinates form vertex shader 
+in vec3 vUV;				//3D texture coordinates form vertex shader 
 								//interpolated by rasterizer
 
 //uniforms
 uniform sampler3D	volume;		//volume dataset
 uniform vec3		camPos;		//camera position
 uniform vec3		step_size;	//ray step size 
+uniform sampler1D lut;		//transfer function (lookup table) texture
 
 //constants
-const int MAX_SAMPLES = 300;	//total samples for each ray march step
+const int MAX_SAMPLES = 1000;	//total samples for each ray march step
 const vec3 texMin = vec3(0);	//minimum texture access coordinate
 const vec3 texMax = vec3(1);	//maximum texture access coordinate
 
@@ -57,7 +58,7 @@ void main()
 			break;
 		
 		// data fetching from the red channel of volume texture
-		float sample = texture(volume, dataPos).r;	
+		vec4 sample = texture(lut, texture(volume, dataPos).r);	
 		
 		//Opacity calculation using compositing:
 		//here we use front to back compositing scheme whereby the current sample
@@ -66,8 +67,8 @@ void main()
 		//Next, this alpha is multiplied with the current sample colour and accumulated
 		//to the composited colour. The alpha value from the previous steps is then 
 		//accumulated to the composited colour alpha.
-		float prev_alpha = sample - (sample * vFragColor.a);
-		vFragColor.rgb = prev_alpha * vec3(sample) + vFragColor.rgb; 
+		float prev_alpha = sample.a - (sample.a * vFragColor.a);
+		vFragColor.rgb = prev_alpha * sample.rgb + vFragColor.rgb; 
 		vFragColor.a += prev_alpha; 
 			
 		//early ray termination
