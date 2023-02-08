@@ -6,12 +6,13 @@ smooth in vec3 vUV;				//3D texture coordinates form vertex shader
 								//interpolated by rasterizer
 
 //uniforms
-uniform sampler3D	volume;			//volume dataset
+uniform sampler3D	volume;			//volumie dataset
 uniform vec3		camPos;			//camera position
 uniform vec3		step_size;		//ray step size 
+uniform sampler1D lut;		//transfer function (lookup table) texture
 
 //constants
-const int MAX_SAMPLES = 300;		//total samples for each ray march step
+const int MAX_SAMPLES = 1000;		//total samples for each ray march step
 const vec3 texMin = vec3(0);		//minimum texture access coordinate
 const vec3 texMax = vec3(1);		//maximum texture access coordinate
 const float DELTA = 0.01;			//the step size for gradient calculation
@@ -27,7 +28,7 @@ vec3 Bisection(vec3 left, vec3 right , float iso)
 		//get the mid value between the left and right limit
 		vec3 midpoint = (right + left) * 0.5;
 		//sample the texture at the middle point
-		float cM = texture(volume, midpoint).x ;
+		float cM = texture(lut, texture(volume, midpoint).x ).a;
 		//check if the value at the middle point is less than the given iso-value
 		if(cM < iso)
 			//if so change the left limit to the new middle point
@@ -40,7 +41,7 @@ vec3 Bisection(vec3 left, vec3 right , float iso)
 	return vec3(right + left) * 0.5;
 }
 
-//function to calculate the gradient at the given location in the volume dataset
+//function to calculate the gradient at the given location in the volumie dataset
 //The function user center finite difference approximation to estimate the 
 //gradient
 vec3 GetGradient(vec3 uvw) 
@@ -48,14 +49,14 @@ vec3 GetGradient(vec3 uvw)
 	vec3 s1, s2;  
 
 	//Using center finite difference 
-	s1.x = texture(volume, uvw-vec3(DELTA,0.0,0.0)).x ;
-	s2.x = texture(volume, uvw+vec3(DELTA,0.0,0.0)).x ;
+	s1.x = texture(lut, texture(volume, uvw-vec3(DELTA,0.0,0.0)).x  ).a;
+	s2.x = texture(lut, texture(volume, uvw+vec3(DELTA,0.0,0.0)).x  ).a;
 
-	s1.y = texture(volume, uvw-vec3(0.0,DELTA,0.0)).x ;
-	s2.y = texture(volume, uvw+vec3(0.0,DELTA,0.0)).x ;
+	s1.y = texture(lut, texture(volume, uvw-vec3(0.0,DELTA,0.0)).x  ).a;
+	s2.y = texture(lut, texture(volume, uvw+vec3(0.0,DELTA,0.0)).x  ).a;
 
-	s1.z = texture(volume, uvw-vec3(0.0,0.0,DELTA)).x ;
-	s2.z = texture(volume, uvw+vec3(0.0,0.0,DELTA)).x ;
+	s1.z = texture(lut, texture(volume, uvw-vec3(0.0,0.0,DELTA)).x  ).a;
+	s2.z = texture(lut, texture(volume, uvw+vec3(0.0,0.0,DELTA)).x  ).a;
 	 
 	return normalize((s1-s2)/2.0); 
 }
@@ -75,7 +76,7 @@ vec4 PhongLighting(vec3 L, vec3 N, vec3 V, float specPower, vec3 diffuseColor)
 
 void main()
 { 
-	//get the 3D texture coordinates for lookup into the volume dataset
+	//get the 3D texture coordinates for lookup into the volumie dataset
 	vec3 dataPos = vUV;
 		
 	//Gettting the ray marching direction:
@@ -98,7 +99,7 @@ void main()
 		
 		//The two constants texMin and texMax have a value of vec3(-1,-1,-1)
 		//and vec3(1,1,1) respectively. To determine if the data value is 
-		//outside the volume data, we use the sign function. The sign function 
+		//outside the volumie data, we use the sign function. The sign function 
 		//return -1 if the value is less than 0, 0 if the value is equal to 0 
 		//and 1 if value is greater than 0. Hence, the sign function for the 
 		//calculation (sign(dataPos-texMin) and sign (texMax-dataPos)) will 
@@ -106,19 +107,19 @@ void main()
 		//When we do a dot product between two vec3(1,1,1) we get the answer 3. 
 		//So to be within the dataset limits, the dot product will return a 
 		//value less than 3. If it is greater than 3, we are already out of 
-		//the volume dataset
+		//the volumie dataset
 		stop = dot(sign(dataPos-texMin),sign(texMax-dataPos)) < 3.0;
 
 		//if the stopping condition is true we brek out of the ray marching loop		
 		if (stop) 
 			break;
 		
-		// data fetching from the red channel of volume texture
-		float sample = texture(volume, dataPos).r;			//current sample
-		float sample2 = texture(volume, dataPos+dirStep).r;	//next sample
+		// data fetching from the red channel of volumie texture
+		float sample = texture(lut, texture(volume, dataPos).r).a;			//current sample
+		float sample2 = texture(lut, texture(volume, dataPos+dirStep).r).a;	//next sample
 
 		//In case of iso-surface rendering, we do not use compositing. 
-		//Instead, we find the zero crossing of the volume dataset iso function 
+		//Instead, we find the zero crossing of the volumie dataset iso function 
 		//by sampling two consecutive samples. 
 		if( (sample -isoValue) < 0  && (sample2-isoValue) >= 0.0)  {
 			//If there is a zero crossing, we refine the detected iso-surface 
