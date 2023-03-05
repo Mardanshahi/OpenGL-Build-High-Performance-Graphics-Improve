@@ -22,7 +22,7 @@ const int HEIGHT = 720;
 
 //camera transform variables
 int state = 0, oldX=0, oldY=0;
-float rX=4, rY=50, dist = -2;
+float rX=0, rY=0, dist = -2;
 
 
 //modelview projection matrices
@@ -37,7 +37,7 @@ GLuint cubeIndicesID;
 GLSLShader shader;
 
 //background colour
-glm::vec4 bg=glm::vec4(0.5,0.5,1,1);
+glm::vec4 bg=glm::vec4(0.3,0.2,0.6,1);
 
 
 //volume dataset filename  
@@ -85,9 +85,9 @@ int index0[] = { 133, 134, 135, 140 };
 //transfer function (lookup table) colour values
 const glm::vec4 jet_values[4] = {
 						glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
-						glm::vec4(1.0f, 0.9f, 0.6f, 0.7f),
-						glm::vec4(1.0f, 0.9f, 1.0f, 0.9f),
-						glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+						glm::vec4(0.3f, 0.3f, 0.2f, 0.5f),
+						glm::vec4(1.0f, 0.9f, 0.9f, 0.75f),
+						glm::vec4(1.0f, 1.0f, 1.0f, 0.79f),
 };
 
 
@@ -107,11 +107,9 @@ bool LoadVolume() {
 		glBindTexture(GL_TEXTURE_3D, textureID);
 		GL_CHECK_ERRORS
 		// set the texture parameters
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		std::cout << glGetError() << std::endl;
-		GL_CHECK_ERRORS
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
@@ -285,7 +283,7 @@ void OnInit() {
 	shader.AddUniform("lut");
 
 	//pass constant uniforms at initialization
-	glUniform3f(shader("step_size"), 1.0f/XDIM, 1.0f/YDIM, 1.0f/ZDIM);
+	glUniform3f(shader("step_size"), 2.0f/XDIM, 2.0f/YDIM, 2.0f/ZDIM);
 	glUniform1i(shader("volume"),0);
 	glUniform1i(shader("lut"), 1);
 
