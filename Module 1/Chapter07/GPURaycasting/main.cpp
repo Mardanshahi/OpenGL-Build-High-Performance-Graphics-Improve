@@ -107,11 +107,9 @@ bool LoadVolume() {
 		glBindTexture(GL_TEXTURE_3D, textureID);
 		GL_CHECK_ERRORS
 		// set the texture parameters
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		std::cout << glGetError() << std::endl;
-		GL_CHECK_ERRORS
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
@@ -149,12 +147,10 @@ bool LoadVolumeUShort() {
 		glGenTextures(1, &textureID);
 		glBindTexture(GL_TEXTURE_3D, textureID);
 		GL_CHECK_ERRORS
-			// set the texture parameters
-			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		std::cout << glGetError() << std::endl;
-		GL_CHECK_ERRORS
-			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+		// set the texture parameters
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
@@ -285,7 +281,7 @@ void OnInit() {
 	shader.AddUniform("lut");
 
 	//pass constant uniforms at initialization
-	glUniform3f(shader("step_size"), 1.0f/XDIM, 1.0f/YDIM, 1.0f/ZDIM);
+	glUniform3f(shader("step_size"), 2.0f/XDIM, 2.0f/YDIM, 2.0f/ZDIM);
 	glUniform1i(shader("volume"),0);
 	glUniform1i(shader("lut"), 1);
 

@@ -20,7 +20,7 @@ void main()
 { 
 	//get the 3D texture coordinates for lookup into the volume dataset
 	vec3 dataPos = vUV;
-
+	vFragColor = vec4(0,0,0,0);
 	//Getting the ray marching direction:
 	//get the object space position by subracting 0.5 from the
 	//3D texture coordinates. Then subtraact it from camera position
@@ -74,7 +74,7 @@ void main()
 		//early ray termination
 		//if the currently composited colour alpha is already fully saturated
 		//we terminated the loop
-		if( vFragColor.a>0.99)
+		if( vFragColor.a > 0.9)
 			break;
 	} 
 }
