@@ -53,7 +53,7 @@ GLuint volumeVAO;
 glm::vec4 bg=glm::vec4(0.5,0.5,1,1);
 
 //volume data files
-const std::string volume_file = "../media/vista-ct.raw";
+//const std::string volume_file = "../media/vista-ct.raw";
 //bool is16bit = true;
 
 //dimensions of volume data
@@ -200,6 +200,7 @@ glm::vec3 viewDir;
 //index difference. Then it linearly interpolates the adjacent values to get the 
 //interpolated result.
 void LoadTransferFunction() {
+	GL_CHECK_ERRORS
 	float pData[256][4];
 	int indices[4];
 
@@ -260,33 +261,42 @@ void LoadTransferFunction() {
 //mouse down event handler
 void OnMouseDown(int button, int s, int x, int y)
 {
-	if (s == GLUT_DOWN)
-	{
-		oldX = x;
-		oldY = y;
-	}
+	mRotReference.x = x;
+	mRotReference.y = y;
 
-	if(button == GLUT_MIDDLE_BUTTON)
-		state = 0;
-	else
-		state = 1;
+	//if (s == GLUT_DOWN)
+	//{
+	//	oldX = x;
+	//	oldY = y;
+	//}
 
-	if(s == GLUT_UP)
-		bViewRotated = false;
+	//if(button == GLUT_MIDDLE_BUTTON)
+	//	state = 0;
+	//else
+	//	state = 1;
+
+	//if(s == GLUT_UP)
+	//	bViewRotated = false;
 }
 
 //mouse move event handler
 void OnMouseMove(int x, int y)
 {
-	if (state == 0) {
-		dist += (y - oldY)/50.0f;
-	} else {
-		rX += (y - oldY)/50.0f;
-		rY -= (x - oldX)/50.0f;
-		bViewRotated = true;
-	}
-	oldX = x;
-	oldY = y;
+	
+	m_Transformation.Rotate(mRotReference.y - y, mRotReference.x - x, 0.0f);
+	m_Renderer.SetRotation(m_Transformation.GetMatrix());
+	mRotReference.x = x;
+	mRotReference.y = y;
+	
+	//if (state == 0) {
+	//	dist += (y - oldY)/50.0f;
+	//} else {
+	//	rX += (y - oldY)/50.0f;
+	//	rY -= (x - oldX)/50.0f;
+	//	bViewRotated = true;
+	//}
+	//oldX = x;
+	//oldY = y;
 
 	glutPostRedisplay();
 }
@@ -308,6 +318,9 @@ void OnInit() {
 	{
 		std::cerr <<"Failed to read the data";
 	}
+	m_Renderer.SetImage(m_RawDataProc.getData());
+
+
 
 	////load volume data and generate the volume texture
 	//if (is16bit? LoadVolumeUShort(): LoadVolume())
@@ -367,35 +380,24 @@ void OnShutdown() {
 }
 
 //resize event handler
-void OnResize(int w, int h) {
-	//setup the viewport
-	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
+void OnResize(int w, int h) 
+{
+	m_Renderer.Resize(w, h);
 
+	//setup the viewport
+	//glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	//setup the projection matrix
-	P = glm::perspective(7.0f,(float)w/h, 0.1f,1000.0f);
+	//P = glm::perspective(7.0f,(float)w/h, 0.1f,1000.0f);
 }
 
 //display function
 void OnRender() {
 	GL_CHECK_ERRORS
 
-	//Render
-	//float fFrameCount = (float)data.dim.z;
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	m_Renderer.Render();
+	glutSwapBuffers();
 
-	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0.05f);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glMatrixMode(GL_TEXTURE);
-	glLoadIdentity();
-
-	// Translate and make 0.5f as the center 
-	// (texture co ordinate is from 0 to 1. so center of rotation has to be 0.5f)
-	glTranslatef(0.5f, 0.5f, 0.5f);
-
+	
 	// A scaling applied to normalize the axis 
 	// (Usually the number of slices will be less so if this is not - 
 	// normalized then the z axis will look bulky)
@@ -488,13 +490,23 @@ int main(int argc, char** argv) {
 	//freeglut initialization
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitContextVersion (3, 3);
+	glutInitContextVersion (2, 1);
 	glutInitContextFlags (GLUT_COMPATIBILITY_PROFILE| GLUT_DEBUG);
 	glutInitWindowSize(WIDTH, HEIGHT);
 	glutCreateWindow("Volume Rendering using 3D Texture Slicing - OpenGL 3.3");
 
+	
+	//mhContext = ::GetDC(m_hWnd);
+	if (!m_Renderer.Initialize())
+	{
+		std::cerr << "Failed to initialze the renderer !";
+		exit(0);
+	}
+
+
+
 	//glew initialization
-	glewExperimental = GL_TRUE;
+	/*glewExperimental = GL_TRUE;
 	GLenum err = glewInit();
 	if (GLEW_OK != err)	{
 		cerr<<"Error: "<<glewGetErrorString(err)<<endl;
@@ -503,8 +515,8 @@ int main(int argc, char** argv) {
 		{
 			cout<<"Driver supports OpenGL 3.3\nDetails:"<<endl;
 		}
-	}
-	err = glGetError(); //this is to ignore INVALID ENUM error 1282
+	}*/
+	//err = glGetError(); //this is to ignore INVALID ENUM error 1282
 	GL_CHECK_ERRORS
 
 	//output hardware information

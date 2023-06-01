@@ -13,7 +13,7 @@ public:
     CRendererHelper(void);
     virtual ~CRendererHelper(void);
 
-    bool Initialize( HDC hContext_i );
+    bool Initialize(  );
 
     void Resize(unsigned int nWidth_i, unsigned int nHeight_i );
     void SetRotation(const CTranformationMgr::Matrix& matrix)

@@ -19,7 +19,7 @@ CRendererHelper::~CRendererHelper(void)
 }
 
 
-bool CRendererHelper::Initialize( HDC hContext_i )
+bool CRendererHelper::Initialize(  )
 {
     //Setting up the dialog to support the OpenGL.
     PIXELFORMATDESCRIPTOR stPixelFormatDescriptor;
@@ -32,43 +32,55 @@ bool CRendererHelper::Initialize( HDC hContext_i )
     stPixelFormatDescriptor.cDepthBits = 32;
     stPixelFormatDescriptor.cStencilBits = 8;
     stPixelFormatDescriptor.iLayerType = PFD_MAIN_PLANE ;
-    int nPixelFormat = ChoosePixelFormat( hContext_i, &stPixelFormatDescriptor ); //Collect the pixel format.
+    //int nPixelFormat = ChoosePixelFormat( hContext_i, &stPixelFormatDescriptor ); //Collect the pixel format.
 
-    if( nPixelFormat == 0 )
-    {
-        std::cerr << _T( "Error while Choosing Pixel format" );
-        return false;
-    }
-    //Set the pixel format to the current dialog.
-    if( !SetPixelFormat( hContext_i, nPixelFormat, &stPixelFormatDescriptor ))
-    {
-        std::cerr << _T( "Error while setting pixel format" );
-        return false;
-    }
+    //if( nPixelFormat == 0 )
+    //{
+    //    std::cerr << _T( "Error while Choosing Pixel format" );
+    //    return false;
+    //}
+    ////Set the pixel format to the current dialog.
+    //if( !SetPixelFormat( hContext_i, nPixelFormat, &stPixelFormatDescriptor ))
+    //{
+    //    std::cerr << _T( "Error while setting pixel format" );
+    //    return false;
+    //}
 
     //Create a device context.
-    m_hglContext = wglCreateContext( hContext_i );
-    if( !m_hglContext )
-    {
-        std::cerr << _T( "Rendering Context Creation Failed" );
-        return false;
-    }
+    //m_hglContext = wglCreateContext( hContext_i );
+    //if( !m_hglContext )
+    //{
+    //    std::cerr << _T( "Rendering Context Creation Failed" );
+    //    return false;
+    //}
     //Make the created device context as the current device context.
-    BOOL bResult = wglMakeCurrent( hContext_i, m_hglContext );
-    if( !bResult )
-    {
-        std::cerr << _T( "wglMakeCurrent Failed" );
-        return false;
-    }
+    //BOOL bResult = wglMakeCurrent( hContext_i, m_hglContext );
+    //if( !bResult )
+    //{
+    //    std::cerr << _T( "wglMakeCurrent Failed" );
+    //    return false;
+    //}
 
     glClearColor( 0.0f,0.0f, 0.0f, 0.0f );
+    glewExperimental = GL_TRUE;
 
-    glewInit();
+    GLenum err = glewInit();
     if(GL_TRUE != glewGetExtension("GL_EXT_texture3D"))
     {
         std::cerr <<  _T( "3D texture is not supported !" );
         return false;
     }
+
+    if (GLEW_OK != err) {
+        std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
+    }
+    else {
+        if (GLEW_VERSION_3_3)
+        {
+            std::cout << "Driver supports OpenGL 3.3\nDetails:" << std::endl;
+        }
+    }
+    err = glGetError(); //this is to ignore INVALID ENUM error 1282
 
     return true;
 }
