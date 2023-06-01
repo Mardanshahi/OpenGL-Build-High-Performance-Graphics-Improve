@@ -36,29 +36,29 @@ bool CRawDataProcessor::LoadFile(std::string lpDataFile_i, unsigned int nWidth_i
         data.dim.z = nSlices_i;
         data.dim.x = nWidth_i;
         data.dim.y = nHeight_i;
-
+        auto ddd = data.dim.size();
 
         // Holds the luminance buffer
-        //std::vector<char> buffer(data.dim.size());
+        std::vector<char> buffer(data.dim.size());
         // Holds the RGBA buffer
-        //std::vector<char> rgbaBuffer(data.dim.size() * 4);
+        std::vector<char> rgbaBuffer(data.dim.size() * 4);
 
         //Medfile.Read(buffer.data(), data.dim.size());
         //read the volume data file
-        GLubyte* pData = new GLubyte[nWidth_i * nHeight_i * nSlices_i];
-        infile.read(reinterpret_cast<char*>(pData), nWidth_i * nHeight_i * nSlices_i * sizeof(GLubyte));
+        //GLubyte* pData = new GLubyte[nWidth_i * nHeight_i * nSlices_i];
+        infile.read(buffer.data(), data.dim.size());
         infile.close();
         // Convert the data to RGBA data.
         // Here we are simply putting the same value to R, G, B and A channels.
         // Usually for raw data, the alpha value will be constructed by a threshold value given by the user 
 
-     /*   for (unsigned int nIndx = 0; nIndx < (data.dim.size()); ++nIndx)
+        for (unsigned int nIndx = 0; nIndx < (data.dim.size()); ++nIndx)
         {
             rgbaBuffer[nIndx * 4] = buffer[nIndx];
             rgbaBuffer[nIndx * 4 + 1] = buffer[nIndx];
             rgbaBuffer[nIndx * 4 + 2] = buffer[nIndx];
             rgbaBuffer[nIndx * 4 + 3] = buffer[nIndx];
-        }*/
+        }
 
         // If this function is getting called again for another data file.
         // Deleting and creating texture is not a good idea, 
@@ -80,7 +80,7 @@ bool CRawDataProcessor::LoadFile(std::string lpDataFile_i, unsigned int nWidth_i
 
 
         glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, data.dim.x, data.dim.y, data.dim.z, 0,
-            GL_RGBA, GL_UNSIGNED_BYTE, pData);
+            GL_RGBA, GL_UNSIGNED_BYTE, rgbaBuffer.data());
         glBindTexture(GL_TEXTURE_3D, 0);
 
         return true;

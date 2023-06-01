@@ -44,25 +44,25 @@ GLuint volumeVAO;
 
 
 //maximum number of slices
-const int MAX_SLICES = 512;
+//const int MAX_SLICES = 512;
 
 //sliced vertices
-glm::vec3 vTextureSlices[MAX_SLICES*12];
+//glm::vec3 vTextureSlices[MAX_SLICES*12];
 
 //background colour
 glm::vec4 bg=glm::vec4(0.5,0.5,1,1);
 
 //volume data files
 const std::string volume_file = "../media/vista-ct.raw";
-bool is16bit = true;
+//bool is16bit = true;
 
 //dimensions of volume data
-const int XDIM = 512;
-const int YDIM = 512;
-const int ZDIM = 54;
+//const int XDIM = 512;
+//const int YDIM = 512;
+//const int ZDIM = 54;
 
 //total number of slices current used
-int num_slices =  256;
+//int num_slices =  256;
 
 //OpenGL volume texture id
 GLuint textureID;
@@ -109,92 +109,92 @@ const glm::vec4 jet_values[4] = {
 glm::vec3 viewDir;
 
 //function that load a volume from the given raw data file and generates an OpenGL 3D texture from it
-bool LoadVolume() {
-	std::ifstream infile(volume_file.c_str(), std::ios_base::binary);
-
-	if(infile.good()) {
-		//read the volume data file
-		GLubyte* pData = new GLubyte[XDIM*YDIM*ZDIM];
-		infile.read(reinterpret_cast<char*>(pData), XDIM*YDIM*ZDIM*sizeof(GLubyte));
-		infile.close();
-
-		//generate OpenGL texture
-		glGenTextures(1, &textureID);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_3D, textureID);
-
-		// set the texture parameters
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-		//set the mipmap levels (base and max)
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 4);
-
-		//allocate data with internal format and foramt as (GL_RED)		
-		glTexImage3D(GL_TEXTURE_3D,0,GL_RED,XDIM,YDIM,ZDIM,0,GL_RED,GL_UNSIGNED_BYTE,pData);
-
-		std::cout << glGetError() << std::endl;
-		GL_CHECK_ERRORS
-
-		//generate mipmaps
-		glGenerateMipmap(GL_TEXTURE_3D);
-
-		//delete the volume data allocated on heap
-		delete [] pData;
-
-		return true;
-	} else {
-		return false;
-	}
-}
-
-bool LoadVolumeUShort() {
-	std::ifstream infile(volume_file.c_str(), std::ios_base::binary);
-
-	if (infile.good()) {
-		//read the volume data file
-		GLushort* pData = new GLushort[XDIM * YDIM * ZDIM];
-		infile.read(reinterpret_cast<char*>(pData), XDIM * YDIM * ZDIM * sizeof(GLushort));
-		infile.close();
-
-		//generate OpenGL texture
-		glGenTextures(1, &textureID);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_3D, textureID);
-
-		// set the texture parameters
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-		//set the mipmap levels (base and max)
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 4);
-
-		//allocate data with internal format and foramt as (GL_RED)		
-		glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, XDIM, YDIM, ZDIM, 0, GL_RED, GL_UNSIGNED_SHORT, pData);
-
-		std::cout << glGetError() << std::endl;
-		GL_CHECK_ERRORS
-
-			//generate mipmaps
-			glGenerateMipmap(GL_TEXTURE_3D);
-
-		//delete the volume data allocated on heap
-		delete[] pData;
-
-		return true;
-	}
-	else {
-		return false;
-	}
-}
+//bool LoadVolume() {
+//	std::ifstream infile(volume_file.c_str(), std::ios_base::binary);
+//
+//	if(infile.good()) {
+//		//read the volume data file
+//		GLubyte* pData = new GLubyte[XDIM*YDIM*ZDIM];
+//		infile.read(reinterpret_cast<char*>(pData), XDIM*YDIM*ZDIM*sizeof(GLubyte));
+//		infile.close();
+//
+//		//generate OpenGL texture
+//		glGenTextures(1, &textureID);
+//		glActiveTexture(GL_TEXTURE0);
+//		glBindTexture(GL_TEXTURE_3D, textureID);
+//
+//		// set the texture parameters
+//		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+//		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+//		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+//		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//
+//		//set the mipmap levels (base and max)
+//		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0);
+//		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 4);
+//
+//		//allocate data with internal format and foramt as (GL_RED)		
+//		glTexImage3D(GL_TEXTURE_3D,0,GL_RED,XDIM,YDIM,ZDIM,0,GL_RED,GL_UNSIGNED_BYTE,pData);
+//
+//		std::cout << glGetError() << std::endl;
+//		GL_CHECK_ERRORS
+//
+//		//generate mipmaps
+//		glGenerateMipmap(GL_TEXTURE_3D);
+//
+//		//delete the volume data allocated on heap
+//		delete [] pData;
+//
+//		return true;
+//	} else {
+//		return false;
+//	}
+//}
+//
+//bool LoadVolumeUShort() {
+//	std::ifstream infile(volume_file.c_str(), std::ios_base::binary);
+//
+//	if (infile.good()) {
+//		//read the volume data file
+//		GLushort* pData = new GLushort[XDIM * YDIM * ZDIM];
+//		infile.read(reinterpret_cast<char*>(pData), XDIM * YDIM * ZDIM * sizeof(GLushort));
+//		infile.close();
+//
+//		//generate OpenGL texture
+//		glGenTextures(1, &textureID);
+//		glActiveTexture(GL_TEXTURE0);
+//		glBindTexture(GL_TEXTURE_3D, textureID);
+//
+//		// set the texture parameters
+//		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+//		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+//		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+//		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//
+//		//set the mipmap levels (base and max)
+//		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0);
+//		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 4);
+//
+//		//allocate data with internal format and foramt as (GL_RED)		
+//		glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, XDIM, YDIM, ZDIM, 0, GL_RED, GL_UNSIGNED_SHORT, pData);
+//
+//		std::cout << glGetError() << std::endl;
+//		GL_CHECK_ERRORS
+//
+//			//generate mipmaps
+//			glGenerateMipmap(GL_TEXTURE_3D);
+//
+//		//delete the volume data allocated on heap
+//		delete[] pData;
+//
+//		return true;
+//	}
+//	else {
+//		return false;
+//	}
+//}
 //function to generate interpolated colours from the set of colour values (jet_values)
 //this function first calculates the amount of increments for each component and the
 //index difference. Then it linearly interpolates the adjacent values to get the 
@@ -304,18 +304,18 @@ void OnInit() {
 	//{
 	//	exit(0);
 	//}
-	if (!m_RawDataProc.LoadFile( "head256.raw", 256, 256, 225))
+	if (!m_RawDataProc.LoadFile( "D:/MyMedia/Projects/Github/Masoudm969/OpenGL-Build-High-Performance-Graphics-Improved/Module 1/Chapter07/media/head256.raw", 256, 256, 225))
 	{
 		std::cerr <<"Failed to read the data";
 	}
 
-	//load volume data and generate the volume texture
-	if (is16bit? LoadVolumeUShort(): LoadVolume())
-		std::cout<<"Volume data loaded successfully."<<std::endl;
-	else {
-		std::cout<<"Cannot load volume data."<<std::endl;
-		exit(EXIT_FAILURE);
-	}
+	////load volume data and generate the volume texture
+	//if (is16bit? LoadVolumeUShort(): LoadVolume())
+	//	std::cout<<"Volume data loaded successfully."<<std::endl;
+	//else {
+	//	std::cout<<"Cannot load volume data."<<std::endl;
+	//	exit(EXIT_FAILURE);
+	//}
 
 	//load the transfer function data and generate the trasnfer function (lookup table) texture
 	LoadTransferFunction();
@@ -339,7 +339,7 @@ void OnInit() {
 	glBindBuffer (GL_ARRAY_BUFFER, volumeVBO);
 
 	//pass the sliced vertices vector to buffer object memory
-	glBufferData (GL_ARRAY_BUFFER, sizeof(vTextureSlices), 0, GL_DYNAMIC_DRAW);
+	//glBufferData (GL_ARRAY_BUFFER, sizeof(vTextureSlices), 0, GL_DYNAMIC_DRAW);
 
 	GL_CHECK_ERRORS
 
@@ -464,24 +464,24 @@ void OnRender() {
 }
 
 //keyboard function to change the number of slices
-void OnKey(unsigned char key, int x, int y) {
-	switch(key) {
-		case '-':
-			num_slices--;
-			break;
-
-		case '+':
-			num_slices++;
-			break;
-	}
-	//check the range of num_slices variable
-	num_slices = min(MAX_SLICES, max(num_slices,3));
-
-
-
-	//recall display function
-	glutPostRedisplay();
-}
+//void OnKey(unsigned char key, int x, int y) {
+//	switch(key) {
+//		case '-':
+//			num_slices--;
+//			break;
+//
+//		case '+':
+//			num_slices++;
+//			break;
+//	}
+//	//check the range of num_slices variable
+//	num_slices = min(MAX_SLICES, max(num_slices,3));
+//
+//
+//
+//	//recall display function
+//	glutPostRedisplay();
+//}
 
 int main(int argc, char** argv) {
 
@@ -525,7 +525,7 @@ int main(int argc, char** argv) {
 	glutReshapeFunc(OnResize);
 	glutMouseFunc(OnMouseDown);
 	glutMotionFunc(OnMouseMove);
-	glutKeyboardFunc(OnKey);
+	//glutKeyboardFunc(OnKey);
 
 	//main loop call
 	glutMainLoop();
