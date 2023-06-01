@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "incs.h"
 #include "RendererHelper.h"
 #include <iostream>
 #include <stdexcept>

@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "incs.h"
 #include "RawDataProcessor.h"
 
 #include <GL\glew.h>

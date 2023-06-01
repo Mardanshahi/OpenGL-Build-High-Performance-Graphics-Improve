@@ -81,7 +81,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\RenderableObject.cpp" />
     <ClCompile Include="Imaging\RawDataProcessor.cpp" />
     <ClCompile Include="Imaging\RendererHelper.cpp" />
     <ClCompile Include="Imaging\TranformationMgr.cpp" />
@@ -91,7 +90,7 @@
     <ClInclude Include="Imaging\RawDataProcessor.h" />
     <ClInclude Include="Imaging\RendererHelper.h" />
     <ClInclude Include="Imaging\TranformationMgr.h" />
-    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="incs.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

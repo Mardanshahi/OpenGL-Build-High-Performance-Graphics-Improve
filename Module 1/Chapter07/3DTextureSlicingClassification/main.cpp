@@ -10,7 +10,7 @@
 #include "Imaging/TranformationMgr.h"
 #include "Imaging/RawDataProcessor.h"
 #include <atltypes.h>
-#include <afxdlgs.h>
+//#include <afxdlgs.h>
 
 
 #define GL_CHECK_ERRORS assert(glGetError()== GL_NO_ERROR);
@@ -299,15 +299,14 @@ void OnInit() {
 	GL_CHECK_ERRORS
 
 
-	CFileDialog objOpenFile(TRUE);
-	if (IDOK != objOpenFile.DoModal())
+	//CFileDialog objOpenFile(TRUE);
+	//if (IDOK != objOpenFile.DoModal())
+	//{
+	//	exit(0);
+	//}
+	if (!m_RawDataProc.LoadFile( "head256.raw", 256, 256, 225))
 	{
-		exit(0);
-	}
-	if (!m_RawDataProc.LoadFile(objOpenFile.GetPathName()/*_T( "head256x256x109.raw")*/,
-		256, 256, 225))
-	{
-		AfxMessageBox(_T("Failed to read the data"));
+		std::cerr <<"Failed to read the data";
 	}
 
 	//load volume data and generate the volume texture

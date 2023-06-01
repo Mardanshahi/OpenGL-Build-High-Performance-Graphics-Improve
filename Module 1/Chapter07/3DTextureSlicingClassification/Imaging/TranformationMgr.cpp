@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "incs.h"
 #include "TranformationMgr.h"
 #include <GL/GL.h>
 
