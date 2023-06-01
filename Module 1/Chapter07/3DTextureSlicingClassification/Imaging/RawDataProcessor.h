@@ -1,4 +1,6 @@
 #pragma once
+#include <fstream>
+#include <iostream>
 class CRawDataProcessor
 {
 public:
@@ -17,14 +19,14 @@ public:
 
     struct Data
     {
-        Dimension dim;
+		Dimension dim;
         unsigned int texture = {0};
     };
 
     CRawDataProcessor(void);
     virtual ~CRawDataProcessor(void);
     // Call this only after the open gl is initialized.
-    bool LoadFile(LPCTSTR lpDataFile_i, unsigned int nWidth_i, unsigned int nHeight_i, unsigned int nSlices_i );
+	bool LoadFile(std::string lpDataFile_i, unsigned int nWidth_i, unsigned int nHeight_i, unsigned int nSlices_i );
 
     const Data& getData()
     {
