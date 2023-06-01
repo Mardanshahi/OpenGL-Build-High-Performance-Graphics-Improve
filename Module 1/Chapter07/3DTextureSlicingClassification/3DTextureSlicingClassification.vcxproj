@@ -56,6 +56,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Imaging\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -83,7 +84,16 @@
     <ClCompile Include="..\src\GLSLShader.cpp" />
     <ClCompile Include="..\src\Grid.cpp" />
     <ClCompile Include="..\src\RenderableObject.cpp" />
+    <ClCompile Include="Imaging\RawDataProcessor.cpp" />
+    <ClCompile Include="Imaging\RendererHelper.cpp" />
+    <ClCompile Include="Imaging\TranformationMgr.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Imaging\RawDataProcessor.h" />
+    <ClInclude Include="Imaging\RendererHelper.h" />
+    <ClInclude Include="Imaging\TranformationMgr.h" />
+    <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

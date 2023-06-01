@@ -335,7 +335,7 @@ void OnInit() {
 	glBindVertexArray(0);
 
 	//slice the volume dataset initially
-	SliceVolume();
+	
 	cout<<"Initialization successfull"<<endl;
 }
 
@@ -364,46 +364,89 @@ void OnResize(int w, int h) {
 //display function
 void OnRender() {
 	GL_CHECK_ERRORS
-	//setup the camera transform
-	glm::mat4 Tr	= glm::translate(glm::mat4(1.0f),glm::vec3(0.0f, 0.0f, dist));
-	glm::mat4 Rx	= glm::rotate(Tr,  rX, glm::vec3(1.0f, 0.0f, 0.0f));
-	glm::mat4 MV    = glm::rotate(Rx, rY, glm::vec3(0.0f, 1.0f, 0.0f));
 
-	//get the viewing direction
-	viewDir = -glm::vec3(MV[0][2], MV[1][2], MV[2][2]);
+	//Render
+	float fFrameCount = (float)data.dim.z;
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//clear the colour and depth buffers
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.05f);
 
-	//get the combined modelview projection matrix
-    glm::mat4 MVP	= P*MV;
-
-	//render the grid object
-	grid->Render(glm::value_ptr(MVP));
-
-	//if view is rotated, reslice the volume
-	if(bViewRotated)
-	{
-		SliceVolume();
-	}
-
-	//enable alpha blending (use over operator)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//bind volume vertex array object
-	glBindVertexArray(volumeVAO);
-	//use the volume shader
-	//pass the shader uniform
-	//draw the triangles
-	glDrawArrays(GL_TRIANGLES, 0, sizeof(vTextureSlices)/sizeof(vTextureSlices[0]));
-	//unbind the shader
+	glMatrixMode(GL_TEXTURE);
+	glLoadIdentity();
 
-	//disable blending
-	glDisable(GL_BLEND);
+	// Translate and make 0.5f as the center 
+	// (texture co ordinate is from 0 to 1. so center of rotation has to be 0.5f)
+	glTranslatef(0.5f, 0.5f, 0.5f);
 
-	//swap front and back buffers to show the rendered result
-	glutSwapBuffers();
+	// A scaling applied to normalize the axis 
+	// (Usually the number of slices will be less so if this is not - 
+	// normalized then the z axis will look bulky)
+	// Flipping of the y axis is done by giving a negative value in y axis.
+	// This can be achieved either by changing the y co ordinates in -
+	// texture mapping or by negative scaling of y axis
+	glScaled((float)data.dim.x / (float)data.dim.x,
+		-1.0f * (float)data.dim.x / (float)(float)data.dim.y,
+		(float)data.dim.x / (float)data.dim.z);
+
+	// Apply the user provided transformations
+	glMultMatrixd(rotationMatrix.ptr());
+
+	glTranslatef(-0.5f, -0.5f, -0.5f);
+
+	glEnable(GL_TEXTURE_3D);
+	glBindTexture(GL_TEXTURE_3D, data.texture);
+	for (float fIndx = -1.0f; fIndx <= 1.0f; fIndx += 0.01f)
+	{
+		glBegin(GL_QUADS);
+		MAP_3DTEXT(fIndx);
+		glEnd();
+	}
+
+
+	//setup the camera transform
+	//glm::mat4 Tr	= glm::translate(glm::mat4(1.0f),glm::vec3(0.0f, 0.0f, dist));
+	//glm::mat4 Rx	= glm::rotate(Tr,  rX, glm::vec3(1.0f, 0.0f, 0.0f));
+	//glm::mat4 MV    = glm::rotate(Rx, rY, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	////get the viewing direction
+	//viewDir = -glm::vec3(MV[0][2], MV[1][2], MV[2][2]);
+
+	////clear the colour and depth buffers
+	//glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+	////get the combined modelview projection matrix
+ //   glm::mat4 MVP	= P*MV;
+
+	////render the grid object
+	//grid->Render(glm::value_ptr(MVP));
+
+	////if view is rotated, reslice the volume
+	//if(bViewRotated)
+	//{
+	//	SliceVolume();
+	//}
+
+	////enable alpha blending (use over operator)
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	////bind volume vertex array object
+	//glBindVertexArray(volumeVAO);
+	////use the volume shader
+	////pass the shader uniform
+	////draw the triangles
+	//glDrawArrays(GL_TRIANGLES, 0, sizeof(vTextureSlices)/sizeof(vTextureSlices[0]));
+	////unbind the shader
+
+	////disable blending
+	//glDisable(GL_BLEND);
+
+	////swap front and back buffers to show the rendered result
+	//glutSwapBuffers();
 }
 
 //keyboard function to change the number of slices
@@ -420,8 +463,7 @@ void OnKey(unsigned char key, int x, int y) {
 	//check the range of num_slices variable
 	num_slices = min(MAX_SLICES, max(num_slices,3));
 
-	//slice the volume
-	SliceVolume();
+
 
 	//recall display function
 	glutPostRedisplay();
@@ -476,3 +518,26 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
