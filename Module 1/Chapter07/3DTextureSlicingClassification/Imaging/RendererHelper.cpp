@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 #include "RendererHelper.h"
+#include <iostream>
+#include <stdexcept>
 
 #pragma comment ( lib, "OpenGL32.lib" )
 #pragma comment ( lib, "glew32.lib" )
@@ -34,13 +36,13 @@ bool CRendererHelper::Initialize( HDC hContext_i )
 
     if( nPixelFormat == 0 )
     {
-        AfxMessageBox( _T( "Error while Choosing Pixel format" ));
+        std::cerr << _T( "Error while Choosing Pixel format" );
         return false;
     }
     //Set the pixel format to the current dialog.
     if( !SetPixelFormat( hContext_i, nPixelFormat, &stPixelFormatDescriptor ))
     {
-        AfxMessageBox( _T( "Error while setting pixel format" ));
+        std::cerr << _T( "Error while setting pixel format" );
         return false;
     }
 
@@ -48,14 +50,14 @@ bool CRendererHelper::Initialize( HDC hContext_i )
     m_hglContext = wglCreateContext( hContext_i );
     if( !m_hglContext )
     {
-        AfxMessageBox( _T( "Rendering Context Creation Failed" ));
+        std::cerr << _T( "Rendering Context Creation Failed" );
         return false;
     }
     //Make the created device context as the current device context.
     BOOL bResult = wglMakeCurrent( hContext_i, m_hglContext );
     if( !bResult )
     {
-        AfxMessageBox( _T( "wglMakeCurrent Failed" ));
+        std::cerr << _T( "wglMakeCurrent Failed" );
         return false;
     }
 
@@ -64,7 +66,7 @@ bool CRendererHelper::Initialize( HDC hContext_i )
     glewInit();
     if(GL_TRUE != glewGetExtension("GL_EXT_texture3D"))
     {
-        AfxMessageBox( _T( "3D texture is not supported !" ));
+        std::cerr <<  _T( "3D texture is not supported !" );
         return false;
     }
 

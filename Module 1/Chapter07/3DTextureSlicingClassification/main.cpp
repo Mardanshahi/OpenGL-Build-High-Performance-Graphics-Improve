@@ -1,21 +1,30 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <iostream>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 #include <fstream>
 
+#include "Imaging/RendererHelper.h"
+#include "Imaging/TranformationMgr.h"
+#include "Imaging/RawDataProcessor.h"
+#include <atltypes.h>
+#include <afxdlgs.h>
+
+
 #define GL_CHECK_ERRORS assert(glGetError()== GL_NO_ERROR);
-
-//for floating point inaccuracy
-const float EPSILON = 0.0001f;
-
 #pragma comment(lib, "glew32.lib")
-
 using namespace std;
+
+
+CRendererHelper m_Renderer;
+CPoint mRotReference;
+CRawDataProcessor m_RawDataProc;
+CTranformationMgr m_Transformation;
+
+
+
 
 //screen dimensions
 const int WIDTH  = 1280;
@@ -25,9 +34,6 @@ const int HEIGHT = 960;
 int state = 0, oldX=0, oldY=0;
 float rX=4, rY=50, dist = -2;
 
-//grid object
-#include "..\src\Grid.h"
-CGrid* grid;
 
 //modelview and projection matrices
 glm::mat4 MV,P;
@@ -293,6 +299,16 @@ void OnInit() {
 	GL_CHECK_ERRORS
 
 
+	CFileDialog objOpenFile(TRUE);
+	if (IDOK != objOpenFile.DoModal())
+	{
+		exit(0);
+	}
+	if (!m_RawDataProc.LoadFile(objOpenFile.GetPathName()/*_T( "head256x256x109.raw")*/,
+		256, 256, 225))
+	{
+		AfxMessageBox(_T("Failed to read the data"));
+	}
 
 	//load volume data and generate the volume texture
 	if (is16bit? LoadVolumeUShort(): LoadVolume())
@@ -348,7 +364,6 @@ void OnShutdown() {
 	glDeleteTextures(1, &textureID);
 	glDeleteTextures(1, &tfTexID);
 
-	delete grid;
 	cout<<"Shutdown successfull"<<endl;
 }
 
@@ -366,7 +381,7 @@ void OnRender() {
 	GL_CHECK_ERRORS
 
 	//Render
-	float fFrameCount = (float)data.dim.z;
+	//float fFrameCount = (float)data.dim.z;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glEnable(GL_ALPHA_TEST);
@@ -388,23 +403,23 @@ void OnRender() {
 	// Flipping of the y axis is done by giving a negative value in y axis.
 	// This can be achieved either by changing the y co ordinates in -
 	// texture mapping or by negative scaling of y axis
-	glScaled((float)data.dim.x / (float)data.dim.x,
-		-1.0f * (float)data.dim.x / (float)(float)data.dim.y,
-		(float)data.dim.x / (float)data.dim.z);
+	//glScaled((float)data.dim.x / (float)data.dim.x,
+	//	-1.0f * (float)data.dim.x / (float)(float)data.dim.y,
+	//	(float)data.dim.x / (float)data.dim.z);
 
-	// Apply the user provided transformations
-	glMultMatrixd(rotationMatrix.ptr());
+	//// Apply the user provided transformations
+	//glMultMatrixd(rotationMatrix.ptr());
 
-	glTranslatef(-0.5f, -0.5f, -0.5f);
+	//glTranslatef(-0.5f, -0.5f, -0.5f);
 
-	glEnable(GL_TEXTURE_3D);
-	glBindTexture(GL_TEXTURE_3D, data.texture);
-	for (float fIndx = -1.0f; fIndx <= 1.0f; fIndx += 0.01f)
-	{
-		glBegin(GL_QUADS);
-		MAP_3DTEXT(fIndx);
-		glEnd();
-	}
+	//glEnable(GL_TEXTURE_3D);
+	//glBindTexture(GL_TEXTURE_3D, data.texture);
+	//for (float fIndx = -1.0f; fIndx <= 1.0f; fIndx += 0.01f)
+	//{
+	//	glBegin(GL_QUADS);
+	//	MAP_3DTEXT(fIndx);
+	//	glEnd();
+	//}
 
 
 	//setup the camera transform
