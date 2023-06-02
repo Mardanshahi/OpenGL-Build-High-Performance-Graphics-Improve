@@ -65,11 +65,11 @@ bool CRendererHelper::Initialize(  )
     glewExperimental = GL_TRUE;
 
     GLenum err = glewInit();
-    if(GL_TRUE != glewGetExtension("GL_EXT_texture3D"))
-    {
-        std::cerr <<  _T( "3D texture is not supported !" );
-        return false;
-    }
+    //if(GL_TRUE != glewGetExtension("GL_EXT_texture3D"))
+    //{
+    //    std::cerr <<  _T( "3D texture is not supported !" );
+    //    return false;
+    //}
 
     if (GLEW_OK != err) {
         std::cerr << "Error: " << glewGetErrorString(err) << std::endl;

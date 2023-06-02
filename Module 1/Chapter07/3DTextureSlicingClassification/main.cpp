@@ -28,19 +28,19 @@ CTranformationMgr m_Transformation;
 
 //screen dimensions
 const int WIDTH  = 1280;
-const int HEIGHT = 960;
+const int HEIGHT = 720;
 
 //camera transform variables
-int state = 0, oldX=0, oldY=0;
-float rX=4, rY=50, dist = -2;
+//int state = 0, oldX=0, oldY=0;
+//float rX=4, rY=50, dist = -2;
 
 
 //modelview and projection matrices
-glm::mat4 MV,P;
+//glm::mat4 MV,P;
 
 //volume vertex array and buffer objects
-GLuint volumeVBO;
-GLuint volumeVAO;
+//GLuint volumeVBO;
+//GLuint volumeVAO;
 
 
 //maximum number of slices
@@ -65,37 +65,18 @@ glm::vec4 bg=glm::vec4(0.5,0.5,1,1);
 //int num_slices =  256;
 
 //OpenGL volume texture id
-GLuint textureID;
+//GLuint textureID;
 
 //transfer function (lookup table) texture id
-GLuint tfTexID;
+//GLuint tfTexID;
 
 //flag to see if the view is rotated
 //volume is resliced if the view is rotated
 bool bViewRotated = false;
 
 //unit cube vertices
-glm::vec3 vertexList[8] = {glm::vec3(-0.5,-0.5,-0.5),
-						   glm::vec3( 0.5,-0.5,-0.5),
-						   glm::vec3(0.5, 0.5,-0.5),
-						   glm::vec3(-0.5, 0.5,-0.5),
-						   glm::vec3(-0.5,-0.5, 0.5),
-						   glm::vec3(0.5,-0.5, 0.5),
-						   glm::vec3( 0.5, 0.5, 0.5),
-						   glm::vec3(-0.5, 0.5, 0.5)};
 
 //unit cube edges
-int edgeList[8][12] = {
-	{ 0,1,5,6,   4,8,11,9,  3,7,2,10 }, // v0 is front
-	{ 0,4,3,11,  1,2,6,7,   5,9,8,10 }, // v1 is front
-	{ 1,5,0,8,   2,3,7,4,   6,10,9,11}, // v2 is front
-	{ 7,11,10,8, 2,6,1,9,   3,0,4,5  }, // v3 is front
-	{ 8,5,9,1,   11,10,7,6, 4,3,0,2  }, // v4 is front
-	{ 9,6,10,2,  8,11,4,7,  5,0,1,3  }, // v5 is front
-	{ 9,8,5,4,   6,1,2,0,   10,7,11,3}, // v6 is front
-	{ 10,9,6,5,  7,2,3,1,   11,4,8,0 }  // v7 is front
-};
-const int edges[12][2]= {{0,1},{1,2},{2,3},{3,0},{0,4},{1,5},{2,6},{3,7},{4,5},{5,6},{6,7},{7,4}};
 
 //transfer function (lookup table) colour values
 const glm::vec4 jet_values[4] = {
@@ -106,7 +87,6 @@ const glm::vec4 jet_values[4] = {
 								 };
 
 //current viewing direction
-glm::vec3 viewDir;
 
 //function that load a volume from the given raw data file and generates an OpenGL 3D texture from it
 //bool LoadVolume() {
@@ -199,64 +179,64 @@ glm::vec3 viewDir;
 //this function first calculates the amount of increments for each component and the
 //index difference. Then it linearly interpolates the adjacent values to get the 
 //interpolated result.
-void LoadTransferFunction() {
-	GL_CHECK_ERRORS
-	float pData[256][4];
-	int indices[4];
-
-	//fill the colour values at the place where the colour should be after interpolation
-	// index must be below 256
-	int index0[] = {130, 131, 140, 141};
-		
-		for (int i = 0; i < 4; i++)
-		{
-			pData[index0[i]][0] = jet_values[i].x;
-			pData[index0[i]][1] = jet_values[i].y;
-			pData[index0[i]][2] = jet_values[i].z;
-			pData[index0[i]][3] = jet_values[i].w;
-			indices[i] = index0[i];
-
-		}
-
-
-	//for each adjacent pair of colours, find the difference in the rgba values and then interpolate
-	for(int j=0;j<4-1;j++)
-	{
-		float dDataR = (pData[indices[j+1]][0] - pData[indices[j]][0]);
-		float dDataG = (pData[indices[j+1]][1] - pData[indices[j]][1]);
-		float dDataB = (pData[indices[j+1]][2] - pData[indices[j]][2]);
-		float dDataA = (pData[indices[j+1]][3] - pData[indices[j]][3]);
-		int dIndex = indices[j+1]-indices[j];
-
-		float dDataIncR = dDataR/float(dIndex);
-		float dDataIncG = dDataG/float(dIndex);
-		float dDataIncB = dDataB/float(dIndex);
-		float dDataIncA = dDataA/float(dIndex);
-		for(int i=indices[j]+1;i<indices[j+1];i++)
-		{
-			pData[i][0] = (pData[i-1][0] + dDataIncR);
-			pData[i][1] = (pData[i-1][1] + dDataIncG);
-			pData[i][2] = (pData[i-1][2] + dDataIncB);
-			pData[i][3] = (pData[i-1][3] + dDataIncA);
-		}
-	}
-
-	//generate the OpenGL texture
-	glGenTextures(1, &tfTexID);
-	//bind this texture to texture unit 1
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_1D, tfTexID);
-
-	// set the texture parameters
-	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-	//allocate the data to texture memory. Since pData is on stack, we donot delete it 
-	glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,pData);
-	
-	GL_CHECK_ERRORS
-}
+//void LoadTransferFunction() {
+//	GL_CHECK_ERRORS
+//	float pData[256][4];
+//	int indices[4];
+//
+//	//fill the colour values at the place where the colour should be after interpolation
+//	// index must be below 256
+//	int index0[] = {130, 131, 140, 141};
+//		
+//		for (int i = 0; i < 4; i++)
+//		{
+//			pData[index0[i]][0] = jet_values[i].x;
+//			pData[index0[i]][1] = jet_values[i].y;
+//			pData[index0[i]][2] = jet_values[i].z;
+//			pData[index0[i]][3] = jet_values[i].w;
+//			indices[i] = index0[i];
+//
+//		}
+//
+//
+//	//for each adjacent pair of colours, find the difference in the rgba values and then interpolate
+//	for(int j=0;j<4-1;j++)
+//	{
+//		float dDataR = (pData[indices[j+1]][0] - pData[indices[j]][0]);
+//		float dDataG = (pData[indices[j+1]][1] - pData[indices[j]][1]);
+//		float dDataB = (pData[indices[j+1]][2] - pData[indices[j]][2]);
+//		float dDataA = (pData[indices[j+1]][3] - pData[indices[j]][3]);
+//		int dIndex = indices[j+1]-indices[j];
+//
+//		float dDataIncR = dDataR/float(dIndex);
+//		float dDataIncG = dDataG/float(dIndex);
+//		float dDataIncB = dDataB/float(dIndex);
+//		float dDataIncA = dDataA/float(dIndex);
+//		for(int i=indices[j]+1;i<indices[j+1];i++)
+//		{
+//			pData[i][0] = (pData[i-1][0] + dDataIncR);
+//			pData[i][1] = (pData[i-1][1] + dDataIncG);
+//			pData[i][2] = (pData[i-1][2] + dDataIncB);
+//			pData[i][3] = (pData[i-1][3] + dDataIncA);
+//		}
+//	}
+//
+//	//generate the OpenGL texture
+//	glGenTextures(1, &tfTexID);
+//	//bind this texture to texture unit 1
+//	glActiveTexture(GL_TEXTURE1);
+//	glBindTexture(GL_TEXTURE_1D, tfTexID);
+//
+//	// set the texture parameters
+//	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//
+//	//allocate the data to texture memory. Since pData is on stack, we donot delete it 
+//	glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,pData);
+//	
+//	GL_CHECK_ERRORS
+//}
 
 //mouse down event handler
 void OnMouseDown(int button, int s, int x, int y)
@@ -318,6 +298,9 @@ void OnInit() {
 	{
 		std::cerr <<"Failed to read the data";
 	}
+	m_Transformation.Rotate(-90.0f, 0.0f, 0.0f);
+	m_Renderer.SetRotation(m_Transformation.GetMatrix());
+
 	m_Renderer.SetImage(m_RawDataProc.getData());
 
 
@@ -331,36 +314,36 @@ void OnInit() {
 	//}
 
 	//load the transfer function data and generate the trasnfer function (lookup table) texture
-	LoadTransferFunction();
+	//LoadTransferFunction();
 
 	//set background colour
-	glClearColor(bg.r, bg.g, bg.b, bg.a);
+	//glClearColor(bg.r, bg.g, bg.b, bg.a);
 
-	//setup the current camera transform and get the view direction vector
-	glm::mat4 T	= glm::translate(glm::mat4(1.0f),glm::vec3(0.0f, 0.0f, dist));
-	glm::mat4 Rx	= glm::rotate(T,  rX, glm::vec3(1.0f, 0.0f, 0.0f));
-	glm::mat4 MV    = glm::rotate(Rx, rY, glm::vec3(0.0f, 1.0f, 0.0f));
+	////setup the current camera transform and get the view direction vector
+	//glm::mat4 T	= glm::translate(glm::mat4(1.0f),glm::vec3(0.0f, 0.0f, dist));
+	//glm::mat4 Rx	= glm::rotate(T,  rX, glm::vec3(1.0f, 0.0f, 0.0f));
+	//glm::mat4 MV    = glm::rotate(Rx, rY, glm::vec3(0.0f, 1.0f, 0.0f));
 
-	//get the current view direction vector
-	viewDir = -glm::vec3(MV[0][2], MV[1][2], MV[2][2]);
+	////get the current view direction vector
+	//viewDir = -glm::vec3(MV[0][2], MV[1][2], MV[2][2]);
 
-	//setup the vertex array and buffer objects
-	glGenVertexArrays(1, &volumeVAO);
-	glGenBuffers(1, &volumeVBO);
+	////setup the vertex array and buffer objects
+	//glGenVertexArrays(1, &volumeVAO);
+	//glGenBuffers(1, &volumeVBO);
 
-	glBindVertexArray(volumeVAO);
-	glBindBuffer (GL_ARRAY_BUFFER, volumeVBO);
+	//glBindVertexArray(volumeVAO);
+	//glBindBuffer (GL_ARRAY_BUFFER, volumeVBO);
 
-	//pass the sliced vertices vector to buffer object memory
-	//glBufferData (GL_ARRAY_BUFFER, sizeof(vTextureSlices), 0, GL_DYNAMIC_DRAW);
+	////pass the sliced vertices vector to buffer object memory
+	////glBufferData (GL_ARRAY_BUFFER, sizeof(vTextureSlices), 0, GL_DYNAMIC_DRAW);
 
-	GL_CHECK_ERRORS
+	//GL_CHECK_ERRORS
 
-	//enable vertex attribute array for position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,0,0);
+	////enable vertex attribute array for position
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,0,0);
 
-	glBindVertexArray(0);
+	//glBindVertexArray(0);
 
 	//slice the volume dataset initially
 	
@@ -370,11 +353,11 @@ void OnInit() {
 //release all allocated resources
 void OnShutdown() {
 
-	glDeleteVertexArrays(1, &volumeVAO);
-	glDeleteBuffers(1, &volumeVBO);
+	//glDeleteVertexArrays(1, &volumeVAO);
+	//glDeleteBuffers(1, &volumeVBO);
 
-	glDeleteTextures(1, &textureID);
-	glDeleteTextures(1, &tfTexID);
+	//glDeleteTextures(1, &textureID);
+	//glDeleteTextures(1, &tfTexID);
 
 	cout<<"Shutdown successfull"<<endl;
 }

@@ -57,7 +57,7 @@ public:
 private:
 
     Matrix mdRotation;
-    float mfRot[3] = {0.0f};
+    float mfRot[3] ;
     
 };
 
