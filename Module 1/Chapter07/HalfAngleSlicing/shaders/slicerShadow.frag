@@ -12,6 +12,9 @@ uniform vec4 color;				//the colour of light
 
 void main()
 {  
+	//initialize the vFragColor to vec4(0,0,0,0)
+	vFragColor = vec4(0,0,0,0);
+
 	//get the light intensity from the shadow texture
     vec3 lightIntensity =  textureProj(shadowTex, vLightUVW.xyw).xyz;
 	
