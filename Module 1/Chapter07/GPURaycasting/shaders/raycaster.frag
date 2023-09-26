@@ -77,7 +77,7 @@ void main()
 		//early ray termination
 		//if the currently composited colour alpha is already fully saturated
 		//we terminated the loop
-		if( vFragColor.a>0.9)
+		if( vFragColor.a > 0.9)
 			break;
 	} 
 }

@@ -77,8 +77,10 @@ vec4 PhongLighting(vec3 L, vec3 N, vec3 V, float specPower, vec3 diffuseColor)
 void main()
 { 
 	//get the 3D texture coordinates for lookup into the volumie dataset
-	vec3 dataPos = vUV;
-		
+	vec3 dataPos = vUV;	
+    //initialize the vFragColor to vec4(0,0,0,0)
+	vFragColor = vec4(0,0,0,0);
+
 	//Gettting the ray marching direction:
 	//get the object space position by subracting 0.5 from the
 	//3D texture coordinates. Then subtraact it from camera position
