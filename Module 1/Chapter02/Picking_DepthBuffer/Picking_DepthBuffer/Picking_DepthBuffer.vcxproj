@@ -88,6 +88,7 @@
     <ClCompile Include="..\..\src\Grid.cpp" />
     <ClCompile Include="..\..\src\Plane.cpp" />
     <ClCompile Include="..\..\src\RenderableObject.cpp" />
+    <ClCompile Include="..\..\src\TargetCamera.cpp" />
     <ClCompile Include="..\..\src\UnitCube.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>

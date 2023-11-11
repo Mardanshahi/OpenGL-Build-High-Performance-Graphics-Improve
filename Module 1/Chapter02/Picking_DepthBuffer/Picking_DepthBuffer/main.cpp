@@ -22,7 +22,7 @@ const int HEIGHT = 960;
 int state = 0, oldX=0, oldY=0;
 float rX=0, rY=0, fov = 45;
 
-#include "..\..\src\FreeCamera.h"
+#include "..\..\src\TargetCamera.h"
 
 //for floating point imprecision
 const float EPSILON = 0.001f;
@@ -41,9 +41,10 @@ float dt = 0;
 
 //time related variables
 float current_time=0, last_time=0;
+const float MOVE_SPEED = 5; //m/s
 
 //free camera instance
-CFreeCamera cam;
+CTargetCamera cam;
 
 //grid object
 #include "..\..\src\Grid.h"
@@ -69,46 +70,6 @@ glm::vec3 box_positions[3]={glm::vec3(-1,0.5,0),
 #include <sstream>
 std::stringstream msg;
 
-//mouse filtering variables
-const float MOUSE_FILTER_WEIGHT=0.75f;
-const int MOUSE_HISTORY_BUFFER_SIZE = 10;
-
-//mouse history buffer
-glm::vec2 mouseHistory[MOUSE_HISTORY_BUFFER_SIZE];
-
-float mouseX=0, mouseY=0; //filtered mouse values
-
-//flag to enable filtering
-bool useFiltering = true;
-
-//mouse move filtering function
-void filterMouseMoves(float dx, float dy) {
-    for (int i = MOUSE_HISTORY_BUFFER_SIZE - 1; i > 0; --i) {
-        mouseHistory[i] = mouseHistory[i - 1];
-    }
-
-    // Store current mouse entry at front of array.
-    mouseHistory[0] = glm::vec2(dx, dy);
-
-    float averageX = 0.0f;
-    float averageY = 0.0f;
-    float averageTotal = 0.0f;
-    float currentWeight = 1.0f;
-
-    // Filter the mouse.
-    for (int i = 0; i < MOUSE_HISTORY_BUFFER_SIZE; ++i)
-    {
-		glm::vec2 tmp=mouseHistory[i];
-        averageX += tmp.x * currentWeight;
-        averageY += tmp.y * currentWeight;
-        averageTotal += 1.0f * currentWeight;
-        currentWeight *= MOUSE_FILTER_WEIGHT;
-    }
-
-    mouseX = averageX / averageTotal;
-    mouseY = averageY / averageTotal;
-
-}
 
 //mouse click handler
 void OnMouseDown(int button, int s, int x, int y)
@@ -158,13 +119,7 @@ void OnMouseMove(int x, int y)
 			rY += (y - oldY)/5.0f;
 			rX += (oldX-x)/5.0f;
 
-			if(useFiltering)
-				filterMouseMoves(rX, rY);
-			else {
-				mouseX = rX;
-				mouseY = rY;
-			}
-			cam.Rotate(mouseX,mouseY, 0);
+			cam.Rotate(rX,rY, 0);
 		}
 		oldX = x;
 		oldY = y;
@@ -185,25 +140,20 @@ void OnInit() {
 
 	GL_CHECK_ERRORS
 
-	//set the camera position
-	glm::vec3 p = glm::vec3(10,10,10);
-	cam.SetPosition(p);
+	//setup the camera position and target
+	cam.SetPosition(glm::vec3(5, 5, 5));
+	cam.SetTarget(glm::vec3(0, 0, 0));
+
 
 	//get the camera look direction to obtain the yaw and pitch values for camera rotation
-	glm::vec3 look=  glm::normalize(p);
+	glm::vec3 look = glm::normalize(cam.GetTarget() - cam.GetPosition());
 	float yaw = glm::degrees(float(atan2(look.z, look.x)+M_PI));
 	float pitch = glm::degrees(asin(look.y));
 	rX = yaw;
 	rY = pitch;
 
-	//if filtering is enabled, save positions to mouse history buffer
-	if(useFiltering) {
-		for (int i = 0; i < MOUSE_HISTORY_BUFFER_SIZE ; ++i) {
-			mouseHistory[i] = glm::vec2(rX, rY);
-		}
-	}
-	cam.Rotate(rX,rY,0);
 
+	cam.Rotate(rX,rY,0);
 	//enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
@@ -230,36 +180,31 @@ void OnResize(int w, int h) {
 
 //set the idle callback
 void OnIdle() {
-
+	bool bPressed = false;
+	float dx = 0, dy = 0;
 	//handle the WSAD, QZ key events to move the camera around
-	if( GetAsyncKeyState(VK_W) & 0x8000) {
-		cam.Walk(dt);
+	if (GetAsyncKeyState(VK_W) & 0x8000) {
+		dy += (MOVE_SPEED * dt);
+		bPressed = true;
 	}
 
-	if( GetAsyncKeyState(VK_S) & 0x8000) {
-		cam.Walk(-dt);
+	if (GetAsyncKeyState(VK_S) & 0x8000) {
+		dy -= (MOVE_SPEED * dt);
+		bPressed = true;
 	}
 
-	if( GetAsyncKeyState(VK_A) & 0x8000) {
-		cam.Strafe(-dt);
+	if (GetAsyncKeyState(VK_A) & 0x8000) {
+		dx -= (MOVE_SPEED * dt);
+		bPressed = true;
 	}
 
-	if( GetAsyncKeyState(VK_D) & 0x8000) {
-		cam.Strafe(dt);
+	if (GetAsyncKeyState(VK_D) & 0x8000) {
+		dx += (MOVE_SPEED * dt);
+		bPressed = true;
 	}
 
-	if( GetAsyncKeyState(VK_Q) & 0x8000) {
-		cam.Lift(dt);
-	}
-
-	if( GetAsyncKeyState(VK_Z) & 0x8000) {
-		cam.Lift(-dt);
-	}
-	glm::vec3 t = cam.GetTranslation(); 
-
-	if(glm::dot(t,t)>EPSILON2) {
-		cam.SetTranslation(t*0.95f);
-	}
+	if (bPressed)
+		cam.Move(dx, dy);
 
 	//call the display function
 	glutPostRedisplay();
