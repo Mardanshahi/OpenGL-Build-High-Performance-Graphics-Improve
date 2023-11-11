@@ -41,7 +41,6 @@ float dt = 0;
 
 //time related variables
 float current_time=0, last_time=0;
-
 const float MOVE_SPEED = 5; //m/s
 
 //free camera instance
@@ -70,7 +69,6 @@ glm::vec3 box_positions[3]={glm::vec3(-1,0.5,0),
 //output message
 #include <sstream>
 std::stringstream msg;
-
 
 
 //mouse click handler
@@ -145,15 +143,16 @@ void OnInit() {
 	cam.SetPosition(glm::vec3(5, 5, 5));
 	cam.SetTarget(glm::vec3(0, 0, 0));
 
+
 	//get the camera look direction to obtain the yaw and pitch values for camera rotation
-	glm::vec3 look=  glm::normalize(cam.GetTarget() - cam.GetPosition());
+	glm::vec3 look = glm::normalize(cam.GetTarget() - cam.GetPosition());
 	float yaw = glm::degrees(float(atan2(look.z, look.x)+M_PI));
 	float pitch = glm::degrees(asin(look.y));
 	rX = yaw;
 	rY = pitch;
 
-	cam.Rotate(rX,rY,0);
 
+	cam.Rotate(rX,rY,0);
 	//enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
@@ -180,7 +179,6 @@ void OnResize(int w, int h) {
 
 //set the idle callback
 void OnIdle() {
-
 	bool bPressed = false;
 	float dx = 0, dy = 0;
 	//handle the WSAD, QZ key events to move the camera around

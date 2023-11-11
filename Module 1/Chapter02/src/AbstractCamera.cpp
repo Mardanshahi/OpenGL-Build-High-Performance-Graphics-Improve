@@ -49,7 +49,6 @@ const float CAbstractCamera::GetAspectRatio() const {
 	return aspect_ratio;
 }
 
-
 void CAbstractCamera::Rotate(const float y, const float p, const float r) {
 	  yaw=glm::radians(y);
 	pitch=glm::radians(p);
