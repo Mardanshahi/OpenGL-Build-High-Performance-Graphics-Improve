@@ -46,10 +46,6 @@ const float MOVE_SPEED = 5; //m/s
 //free camera instance
 CTargetCamera cam;
 
-//grid object
-#include "..\..\src\Grid.h"
-CGrid* grid;
-
 //unit cube object
 #include "..\..\src\UnitCube.h"
 CUnitCube* cube;
@@ -131,9 +127,6 @@ void OnInit() {
 
 	GL_CHECK_ERRORS
 
-	//create a grid of size 20x20 in XZ plane
-	grid = new CGrid(20,20);
-
 	//create a unit cube
 	cube = new CUnitCube();
 
@@ -162,8 +155,6 @@ void OnInit() {
 
 //release all allocated resources
 void OnShutdown() {
-
-	delete grid;
 	delete cube;
 	cout<<"Shutdown successfull"<<endl;
 }
@@ -233,9 +224,6 @@ void OnRender() {
 	MV	= cam.GetViewMatrix();
 	P   = cam.GetProjectionMatrix();
     glm::mat4 MVP	= P*MV;
-
-	//render the grid object
-	grid->Render(glm::value_ptr(MVP));
 
 	//set the first cube transform 
 	//set its colour to cyan if selected, red otherwise

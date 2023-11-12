@@ -83,10 +83,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\AbstractCamera.cpp" />
-    <ClCompile Include="..\..\src\FreeCamera.cpp" />
     <ClCompile Include="..\..\src\GLSLShader.cpp" />
-    <ClCompile Include="..\..\src\Grid.cpp" />
-    <ClCompile Include="..\..\src\Plane.cpp" />
     <ClCompile Include="..\..\src\RenderableObject.cpp" />
     <ClCompile Include="..\..\src\TargetCamera.cpp" />
     <ClCompile Include="..\..\src\UnitCube.cpp" />
