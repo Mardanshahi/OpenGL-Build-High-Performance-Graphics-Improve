@@ -56,8 +56,6 @@ glm::vec2 mouseHistory[MOUSE_HISTORY_BUFFER_SIZE];
 
 float mouseX=0, mouseY=0; //filtered mouse values
 
-//flag to enable filtering
-bool useFiltering = true;
 
 //output message
 #include <sstream>
@@ -72,33 +70,6 @@ GLuint checkerTextureID;
 CTexturedPlane* checker_plane;
  
 //mouse move filtering function
-void filterMouseMoves(float dx, float dy) {
-    for (int i = MOUSE_HISTORY_BUFFER_SIZE - 1; i > 0; --i) {
-        mouseHistory[i] = mouseHistory[i - 1];
-    }
-
-    // Store current mouse entry at front of array.
-    mouseHistory[0] = glm::vec2(dx, dy);
-
-    float averageX = 0.0f;
-    float averageY = 0.0f;
-    float averageTotal = 0.0f;
-    float currentWeight = 1.0f;
-
-    // Filter the mouse.
-    for (int i = 0; i < MOUSE_HISTORY_BUFFER_SIZE; ++i)
-    {
-		glm::vec2 tmp=mouseHistory[i];
-        averageX += tmp.x * currentWeight;
-        averageY += tmp.y * currentWeight;
-        averageTotal += 1.0f * currentWeight;
-        currentWeight *= MOUSE_FILTER_WEIGHT;
-    }
-
-    mouseX = averageX / averageTotal;
-    mouseY = averageY / averageTotal;
-
-}
 
 //mouse click handler
 void OnMouseDown(int button, int s, int x, int y)
@@ -124,13 +95,9 @@ void OnMouseMove(int x, int y)
 	} else {
 		rY += (y - oldY)/5.0f;
 		rX += (oldX-x)/5.0f;
-		if(useFiltering)
-			filterMouseMoves(rX, rY);
-		else {
-			mouseX = rX;
-			mouseY = rY;
-		}
-		cam.Rotate(mouseX,mouseY, 0);
+
+		
+		cam.Rotate(rX,rY, 0);
 	}
 	oldX = x;
 	oldY = y;
@@ -193,11 +160,7 @@ void OnInit() {
 	float pitch = glm::degrees(asin(look.y));
 	rX = yaw;
 	rY = pitch;
-	if(useFiltering) {
-		for (int i = 0; i < MOUSE_HISTORY_BUFFER_SIZE ; ++i) {
-			mouseHistory[i] = glm::vec2(rX, rY);
-		}
-	}
+
 	cam.Rotate(rX,rY,0);
 	cout<<"Initialization successfull"<<endl;
 }
@@ -280,11 +243,7 @@ void OnRender() {
 
 //Keyboard event handler to toggle the mouse filtering using spacebar key
 void OnKey(unsigned char key, int x, int y) {
-	switch(key) {
-		case ' ':
-			useFiltering = !useFiltering;
-		break;
-	}
+	
 	glutPostRedisplay();
 }
 

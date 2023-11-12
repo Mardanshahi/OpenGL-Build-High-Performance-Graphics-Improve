@@ -23,17 +23,9 @@ public:
 	void SetFOV(const float fov);
 	const float GetFOV() const;
 	const float GetAspectRatio() const; 
-	
-	
-	void CalcFrustumPlanes();
-	bool IsPointInFrustum(const glm::vec3& point);
-	bool IsSphereInFrustum(const glm::vec3& center, const float radius);
-	bool IsBoxInFrustum(const glm::vec3& min, const glm::vec3& max);
-	void GetFrustumPlanes(glm::vec4 planes[6]);
 
-	//frustum points
-	glm::vec3 farPts[4];
-	glm::vec3 nearPts[4];
+
+	
 
 protected:	 
 	float yaw, pitch, roll, fov, aspect_ratio, Znear, Zfar;
@@ -46,7 +38,6 @@ protected:
 	glm::mat4 P; //projection matrix
 
 	//Frsutum planes
-	CPlane planes[6];
 
 };
 
