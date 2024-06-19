@@ -2,14 +2,21 @@
 #include <GL/freeglut.h>
 #include <iostream>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "..\src\GLSLShader.h"
 #include <fstream>
+#include <vector>
+#include "SimText3D.h"
+#include "CPU_VD.h"
+#include "VolumeData.h"
+#include "Render.h"
+#include <Segmentation.h>
+
 
 #define GL_CHECK_ERRORS assert(glGetError()== GL_NO_ERROR);
+
+
+
 
 
 //#pragma comment(lib, "glew32.lib")
@@ -48,7 +55,8 @@ bool is16bit = true;
 const int XDIM = 512;
 const int YDIM = 512;
 const int ZDIM = 438;
-
+const glm::vec3 data_size = glm::vec3(512, 512, 438);
+const glm::vec3 spacing = glm::vec3(0.2, 0.2, 1);
 //volume texture ID
 GLuint textureID;
 
@@ -90,6 +98,32 @@ const glm::vec4 jet_values[4] = {
 						glm::vec4(1.0f, 1.0f, 1.0f, 0.79f),
 };
 
+unsigned short max_val[VOLUME_NUM];
+glm::vec3 box1[VOLUME_NUM];
+glm::vec3 box2[VOLUME_NUM];
+glm::vec3 txt_box1[VOLUME_NUM];
+glm::vec3 txt_box2[VOLUME_NUM];
+std::vector<int> max_x[VOLUME_NUM];
+std::vector<int> max_y[VOLUME_NUM];
+std::vector<int> max_z[VOLUME_NUM];
+glm::vec3 block_size_arr[VOLUME_NUM];
+
+glm::vec3 data_spacing;
+
+SimText3D* st[VOLUME_NUM];
+IsoViewer iso ;
+SegmentationMask3D seg_mask;
+
+
+void UploadVD()
+{
+	if (CPU_VD::GetData()->GetSlices())
+	{
+		unsigned short** arr1 = (unsigned short**)CPU_VD::GetData()->GetSlices();
+		//unsigned char **arr2=(unsigned char **)CPU_VD::GetData()->GetSlices();
+		iso.UploadFieldData(arr1, CPU_VD::GetData()->GetSize(), CPU_VD::GetData()->spacing);				//загрузка скал€рных данных в GPU
+	}
+}
 
 //function that load a volume from the given raw data file and 
 //generates an OpenGL 3D texture from it
@@ -105,7 +139,7 @@ bool LoadVolume() {
 		//generate OpenGL texture
 		glGenTextures(1, &textureID);
 		glBindTexture(GL_TEXTURE_3D, textureID);
-		GL_CHECK_ERRORS
+		//GL_CHECK_ERRORS
 		// set the texture parameters
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -120,7 +154,7 @@ bool LoadVolume() {
 		//allocate data with internal format and foramt as (GL_RED)	
 		glTexImage3D(GL_TEXTURE_3D,0,GL_RED,XDIM,YDIM,ZDIM,0,GL_RED,GL_UNSIGNED_BYTE,pData);
 		std::cout << glGetError() << std::endl;
-		GL_CHECK_ERRORS
+		//GL_CHECK_ERRORS
 
 		//generate mipmaps
 		glGenerateMipmap(GL_TEXTURE_3D);
@@ -139,35 +173,33 @@ bool LoadVolumeUShort() {
 
 	if (infile.good()) {
 		//read the volume data file
-		GLushort* pData = new GLushort[XDIM * YDIM * ZDIM];
-		infile.read(reinterpret_cast<char*>(pData), XDIM * YDIM * ZDIM * sizeof(GLushort));
-		infile.close();
+		CPU_VD::GetData()->Allocate(data_size);
+		CPU_VD::GetData()->spacing = spacing;
 
-		//generate OpenGL texture
-		glGenTextures(1, &textureID);
-		glBindTexture(GL_TEXTURE_3D, textureID);
-		GL_CHECK_ERRORS
-		// set the texture parameters
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		for (int i = 0; i < data_size.z; i++)
+		{
+			short* data16 = (short*)CPU_VD::GetData()->GetSlice(data_size.z - i - 1);
+			infile.read(reinterpret_cast<char*>(data16), XDIM * YDIM * sizeof(short));
+			infile.close();
+		}
 
-		//set the mipmap levels (base and max)
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 4);
+		iso.SetBoundingBox(glm::vec3(0), data_size * data_spacing);
+		if (CPU_VD::GetData()->GetSlices())
+		{
+			//CT::need_reload_volume_data = 1;
+			//CT::SetNeedRerenderAll(1);
+			seg_mask.AssignData(CPU_VD::GetData());
+		}
+	
+		UploadVD();
 
-		//allocate data with internal format and foramt as (GL_RED)	
-		glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, XDIM, YDIM, ZDIM, 0, GL_RED, GL_UNSIGNED_SHORT, pData);
-		std::cout << glGetError() << std::endl;
-		GL_CHECK_ERRORS
+		//if (CT::iso->need_reload_acc && CT::seg_mask.IsUsed())
+		//	CT::iso->UploadAccStr(CT::seg_mask.GetMaskData(), CT::seg_mask.GetSize());
 
-			//generate mipmaps
-			glGenerateMipmap(GL_TEXTURE_3D);
 
-		//delete the volume data allocated on heap
-		delete[] pData;
+
+
+
 
 		return true;
 	}
