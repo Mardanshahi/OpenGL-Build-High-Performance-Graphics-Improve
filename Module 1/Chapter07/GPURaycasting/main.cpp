@@ -6,7 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "..\src\GLSLShader.h"
+#include "..\src\Shader.h"
 #include <fstream>
 
 #define GL_CHECK_ERRORS assert(glGetError()== GL_NO_ERROR);
@@ -34,7 +34,7 @@ GLuint cubeVAOID;
 GLuint cubeIndicesID;
 
 //ray casting shader
-GLSLShader shader;
+ShaderProgram shader;
 
 //background colour
 glm::vec4 bg=glm::vec4(0.3,0.2,0.6,1);
@@ -266,19 +266,19 @@ void OnInit() {
 
 
 	//Load the raycasting shader
-	shader.LoadFromFile(GL_VERTEX_SHADER, "shaders/raycaster.vert");
-	shader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/raycaster.frag");
+	shader = ShaderProgram( "shaders/raycaster.vert", "shaders/raycaster.frag");
+
 
 	//compile and link the shader
-	shader.CreateAndLinkProgram();
+	//shader.CreateAndLinkProgram();
 	shader.Use();
 	//add attributes and uniforms
-	shader.AddAttribute("vVertex");
+	/*shader.AddAttribute("vVertex");
 	shader.AddUniform("MVP");
 	shader.AddUniform("volume");
 	shader.AddUniform("camPos");
 	shader.AddUniform("step_size");
-	shader.AddUniform("lut");
+	shader.AddUniform("lut");*/
 
 	//pass constant uniforms at initialization
 	glUniform3f(shader("step_size"), 2.0f/XDIM, 2.0f/YDIM, 2.0f/ZDIM);
