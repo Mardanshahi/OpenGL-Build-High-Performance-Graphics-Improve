@@ -1,5 +1,5 @@
 #pragma once
-#include "GLSLShader.h"
+#include "shader.h"
 
 class RenderableObject
 {
@@ -25,7 +25,7 @@ protected:
 	GLuint vboVerticesID;
 	GLuint vboIndicesID;
 	
-	GLSLShader shader;
+	ShaderProgram shader;
 
 	GLenum primType;
 	int totalVertices, totalIndices;

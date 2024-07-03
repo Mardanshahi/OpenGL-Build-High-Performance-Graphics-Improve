@@ -45,7 +45,8 @@ public:
 	void SetVar(const GLchar *name,float val);
 	void SetVar(const GLchar *name,unsigned int val);
 	void SetVar(const GLchar *name,int val);
-	void SetMatrix3(const GLchar *name,float*m);
+	void SetMatrix3(const GLchar* name, float* m);
+	void SetMatrix4(const GLchar* name, const float* m);
 
 	void SetVar(const GLchar *name,int num,glm::vec4* val);
 	void SetVar(const GLchar *name,int num,float* val);

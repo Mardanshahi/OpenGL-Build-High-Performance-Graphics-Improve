@@ -80,7 +80,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\Grid.cpp" />
     <ClCompile Include="..\src\RenderableObject.cpp" />
     <ClCompile Include="..\src\Shader.cpp" />
     <ClCompile Include="main.cpp" />

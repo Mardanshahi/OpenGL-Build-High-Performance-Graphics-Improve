@@ -34,7 +34,8 @@ GLuint cubeVAOID;
 GLuint cubeIndicesID;
 
 //ray casting shader
-ShaderProgram shader;
+ShaderProgram shader = ShaderProgram("shaders/raycaster.vert", "shaders/raycaster.frag");
+
 
 //background colour
 glm::vec4 bg=glm::vec4(0.3,0.2,0.6,1);
@@ -281,9 +282,9 @@ void OnInit() {
 	shader.AddUniform("lut");*/
 
 	//pass constant uniforms at initialization
-	glUniform3f(shader("step_size"), 2.0f/XDIM, 2.0f/YDIM, 2.0f/ZDIM);
-	glUniform1i(shader("volume"),0);
-	glUniform1i(shader("lut"), 1);
+	shader.SetVar("step_size", glm::vec3(2.0f/XDIM, 2.0f/YDIM, 2.0f/ZDIM));
+	shader.SetVar("volume", 0);
+	shader.SetVar("lut", 1);
 
 	shader.UnUse();
 
@@ -333,7 +334,7 @@ void OnInit() {
 
 //release all allocated resources
 void OnShutdown() {
-	shader.DeleteShaderProgram();
+	
 
 	glDeleteVertexArrays(1, &cubeVAOID);
 	glDeleteBuffers(1, &cubeVBOID);
@@ -379,8 +380,11 @@ void OnRender() {
 	//bind the raycasting shader
 	shader.Use();
 	//pass shader uniforms
-	glUniformMatrix4fv(shader("MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
-	glUniform3fv(shader("camPos"), 1, &(camPos.x));
+	//glUniformMatrix4fv(shader("MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
+	//glUniform3fv(shader("camPos"), 1, &(camPos.x));
+	shader.SetMatrix4("MVP", glm::value_ptr(MVP));
+	shader.SetVar("camPos", camPos);
+
 	//render the cube
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 	//unbind the raycasting shader

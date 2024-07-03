@@ -95,6 +95,7 @@ ShaderProgram::ShaderProgram(const GLchar*vs,const GLchar*fs)
 
     const GLchar* source[2] = {vShader, fShader};
     // Check for shader support first
+    auto kkk = glGetString(GL_VERSION);
     float version = (float)atof((const char *)glGetString(GL_VERSION));
     std::cout << "OpenGL v" << version;
     if (version < 2) {
@@ -225,6 +226,12 @@ void ShaderProgram::SetMatrix3(const GLchar *name,float*m)
 	
 	if(shader_usage!=1)return;
 	glUniformMatrix3fv(getUniLoc(name),sizeof(float),0,m);
+}
+
+void ShaderProgram::SetMatrix4(const GLchar* name, const float* m)
+{
+    if (shader_usage != 1)return;
+    glUniformMatrix4fv(getUniLoc(name), sizeof(float), 0, m);
 }
 
 void ShaderProgram::SetVar(const GLchar *name,int num, glm::vec4* val)
